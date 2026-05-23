@@ -1,0 +1,130 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Document {
+  id              String    @id @default(cuid())
+  title           String
+  regulator       String
+  documentId      String?   // Official ID like RBI/2024/47
+  documentType    String    // circular, master_direction, etc.
+  publicationDate DateTime?
+  sourceHash      String    @unique
+  contentHash     String?   // Hash of PDF content
+  pdfUrl          String?   // Original URL from regulator website
+  localFilePath   String?   // Where PDF is stored
+  extractedText   String?   // Full text after OCR/parsing
+  status          String    @default("INGESTED")
+  ingestionMethod String    @default("AUTO_SCRAPE") // AUTO_SCRAPE or MANUAL_UPLOAD
+  uploadedBy      String?   // Officer ID if manually uploaded
+  createdAt       DateTime  @default(now())
+  maps            Map[]
+}
+
+model Map {
+  id                    String      @id @default(cuid())
+  mapCode               String      @unique  // MAP-RBI-2024-0047-003
+  version               Int         @default(1)
+  
+  // Source info
+  documentId            String
+  sectionReference      String?
+  rawTextExcerpt        String?
+  
+  // Obligation
+  title                 String
+  description           String
+  obligationType        String      // MANDATORY, CONDITIONAL
+  classification        String      // TECHNICAL, NON_TECHNICAL
+  regulatoryKeywords    String[]    // native postgres array of strings
+  
+  // Action
+  deliverable           String
+  deadline              DateTime?
+  priority              String      @default("MEDIUM")  // CRITICAL, HIGH, MEDIUM, LOW
+  riskLevel             String      @default("MEDIUM")
+  riskDescription       String?
+  evidenceRequired      String[]    // what proof is needed
+  
+  // Assignment
+  departmentId          String?
+  assignedTo            String?
+  jiraTicketId          String?
+  
+  // Validation
+  autoValidationResult  String?     // PASSED, FAILED, PARTIALLY_COMPLIANT, NEEDS_REVIEW
+  autoValidationReason  String?
+  officerOverride       String?
+  finalVerdict          String?
+  
+  // AI metadata
+  confidenceScore       Float?
+  flaggedForReview      Boolean     @default(false)
+  flagReason            String?
+  reasoningChain        String?
+  modelUsed             String?
+  
+  // Lifecycle
+  status                String      @default("PENDING_REVIEW")
+  approvedBy            String?
+  approvedAt            DateTime?
+  dispatchedAt          DateTime?
+  closedAt              DateTime?
+  
+  // Relations
+  createdAt             DateTime    @default(now())
+  document              Document    @relation(fields: [documentId], references: [id])
+  department            Department? @relation(fields: [departmentId], references: [id])
+  evidenceFiles         Evidence[]
+  auditLogs             AuditLog[]
+}
+
+model Department {
+  id    String @id @default(cuid())
+  name  String @unique
+  email String
+  maps  Map[]
+}
+
+model Evidence {
+  id           String   @id @default(cuid())
+  mapId        String
+  fileName     String
+  filePath     String
+  fileSize     Int
+  mimeType     String
+  evidenceType String   // deployment_log, screenshot, report, policy_doc, attendance, other
+  uploadedBy   String
+  notes        String?
+  createdAt    DateTime @default(now())
+  map          Map      @relation(fields: [mapId], references: [id])
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  mapId       String?
+  documentId  String?
+  eventType   String   // MAP_APPROVED, MAP_DISPATCHED, MAP_EDITED, etc.
+  actor       String   // "system:agent" or "user:officer_id"
+  description String
+  inputData   Json?
+  outputData  Json?
+  reasoning   String?
+  createdAt   DateTime @default(now())
+  map         Map?     @relation(fields: [mapId], references: [id])
+}
+
+model Alert {
+  id        String   @id @default(cuid())
+  mapId     String?
+  alertType String   // DEADLINE_MISSED, DEADLINE_APPROACHING_7, etc.
+  severity  String   // CRITICAL, HIGH, MEDIUM, ADVISORY
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
