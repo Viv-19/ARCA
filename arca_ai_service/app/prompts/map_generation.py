@@ -36,9 +36,9 @@ Available Bank Departments for Assignments:
 - Operations
 
 JSON Schema Output format:
-{
+{{
   "maps": [
-    {
+    {{
       "title": "Short descriptive compliance title",
       "description": "Granular description of what task must be executed by the bank.",
       "obligation_type": "MANDATORY / CONDITIONAL",
@@ -59,12 +59,12 @@ JSON Schema Output format:
       "flagged_for_review": false,
       "flag_reason": null,
       "reasoning_chain": "Step 1: Analyzed clause x... Step 2: Concluded IT Security must configure... Step 3: Determined deadline to be..."
-    }
+    }}
   ],
   "skipped_provisions": [
     "List of extracted clauses that were deemed informational or non-actionable"
   ]
-}
+}}
 
 Respond strictly with valid JSON. No markdown wrappers, no conversational text.
 """

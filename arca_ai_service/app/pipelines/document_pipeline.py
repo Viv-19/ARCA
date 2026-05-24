@@ -173,7 +173,7 @@ async def node_route_all_maps(state: PipelineState) -> dict:
                 "confidence": result.get("confidence"),
                 "justification": result.get("justification")
             })
-            print(f"[Pipeline] Routed '{map_obj.get('title', '')[:30]}...' → {result.get('department')} ({result.get('confidence', 0):.0%})")
+            print(f"[Pipeline] Routed '{map_obj.get('title', '')[:30]}...' -> {result.get('department')} ({result.get('confidence', 0):.0%})")
         except Exception as e:
             err_msg = f"Routing failed for MAP '{map_obj.get('title', '')[:30]}': {e}"
             print(f"[Pipeline Error] {err_msg}")

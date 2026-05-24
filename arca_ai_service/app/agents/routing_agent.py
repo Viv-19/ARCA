@@ -94,7 +94,7 @@ async def route_map(map_id: str, title: str, description: str, keywords: List[st
     # Seed department embeddings
     seed_department_embeddings_if_empty()
     
-    is_dummy_key = settings.OPENAI_API_KEY == "your_openai_api_key_here" or not settings.OPENAI_API_KEY
+    is_dummy_key = settings.OPENAI_API_KEY == "your_openai_api_key_here" or not settings.OPENAI_API_KEY or settings.OPENAI_API_KEY.startswith("gsk_")
     if is_dummy_key:
         return local_semantic_fallback_router(title, description, keywords)
         
@@ -153,8 +153,11 @@ async def route_map(map_id: str, title: str, description: str, keywords: List[st
         )
         
         response = await llm.ainvoke(prompt)
-        # Parse JSON
-        parsed_res = json.loads(re.sub(r'```json|```', '', response.content).strip())
+        content = response.content.strip()
+        json_match = re.search(r'(\{.*\})', content, re.DOTALL)
+        if json_match:
+            content = json_match.group(1)
+        parsed_res = json.loads(content)
         print(f"[Routing Agent Success] LLM assigned: \"{parsed_res['department']}\".")
         return parsed_res
     except Exception as e:

@@ -144,7 +144,11 @@ async def evaluate_system_risk() -> dict:
         """
         
         response = await llm.ainvoke(prompt)
-        parsed_res = json.loads(re.sub(r'```json|```', '', response.content).strip())
+        content = response.content.strip()
+        json_match = re.search(r'(\{.*\})', content, re.DOTALL)
+        if json_match:
+            content = json_match.group(1)
+        parsed_res = json.loads(content)
         return parsed_res
         
     except Exception as e:
