@@ -1,5 +1,6 @@
 import datetime
 import json
+import re
 from typing import List, Optional
 from pydantic import BaseModel, Field
 from langchain_openai import ChatOpenAI
@@ -115,6 +116,143 @@ def run_mock_map_generation(document_analysis: dict) -> dict:
                     "flagged_for_review": False,
                     "flag_reason": None,
                     "reasoning_chain": "Step 1: Section 2.1 requires FIDO2/hardware multi-factor setups. Step 2: Requires login gateway system edits, so assign to IT Security and Digital Banking IT. Step 3: Priority is CRITICAL as it blocks core payment security threats."
+                }
+            ],
+            "skipped_provisions": []
+        }
+
+    # AML / Anti-Money Laundering MAPs
+    if "aml" in title.lower() or "anti-money" in title.lower() or "suspicious transaction" in title.lower():
+        print("[MAP Generator Agent] AML/CTF context parsed. Emitting compliance action items...")
+        return {
+            "maps": [
+                {
+                    "title": "Automated STR Filing System Integration with FIU-IND Portal",
+                    "description": "Configure and deploy an automated Suspicious Transaction Report (STR) filing pipeline that generates XML-format reports and transmits them to the FIU-IND portal within 7 working days of detection by the transaction monitoring system.",
+                    "obligation_type": "MANDATORY",
+                    "classification": "TECHNICAL",
+                    "deliverable": "Operational FIU-IND STR submission gateway integrated with CBS transaction monitoring alerts.",
+                    "deadline": "2026-09-30",
+                    "priority": "CRITICAL",
+                    "risk_level": "HIGH",
+                    "risk_description": "Non-compliance with PMLA STR filing timelines attracts penalties under Section 13 of the Prevention of Money Laundering Act, 2002.",
+                    "section_reference": "Section 5.2",
+                    "evidence_required": [
+                        "FIU-IND portal integration test logs",
+                        "Sample STR XML submission confirmation receipt",
+                        "CBS alert-to-STR pipeline architecture diagram"
+                    ],
+                    "regulatory_keywords": ["AML", "STR", "FIU-IND", "PMLA", "Transaction Monitoring"],
+                    "confidence_score": 0.94,
+                    "flagged_for_review": False,
+                    "flag_reason": None,
+                    "reasoning_chain": "Step 1: Section 5.2 directly mandates electronic STR filing. Step 2: Requires technical integration with external FIU-IND portal, hence TECHNICAL classification. Step 3: Assigned to Core Banking IT for CBS integration and Compliance Central for STR review workflows."
+                },
+                {
+                    "title": "Transaction Monitoring System (TMS) Deployment for AML Pattern Detection",
+                    "description": "Deploy an automated transaction monitoring system across CBS and digital channels capable of detecting layering, structuring, and rapid fund movement patterns. Configure alert thresholds for cash transactions exceeding Rs. 10 lakh.",
+                    "obligation_type": "MANDATORY",
+                    "classification": "TECHNICAL",
+                    "deliverable": "Active TMS with configured rule engine detecting AML patterns on all retail and corporate transaction flows.",
+                    "deadline": "2026-11-15",
+                    "priority": "HIGH",
+                    "risk_level": "HIGH",
+                    "risk_description": "Absence of automated transaction monitoring exposes the bank to regulatory penalties and reputational risk from undetected money laundering activities.",
+                    "section_reference": "Section 6.4",
+                    "evidence_required": [
+                        "TMS deployment verification report",
+                        "Sample alert generation log showing pattern detection",
+                        "Rule engine configuration export"
+                    ],
+                    "regulatory_keywords": ["AML", "Transaction Monitoring", "Layering", "Structuring", "CBS"],
+                    "confidence_score": 0.91,
+                    "flagged_for_review": False,
+                    "flag_reason": None,
+                    "reasoning_chain": "Step 1: Section 6.4 requires automated TMS. Step 2: Technical system deployment across CBS and digital channels. Step 3: Assigned to Core Banking IT and Risk Management departments."
+                }
+            ],
+            "skipped_provisions": []
+        }
+
+    # Digital Lending MAPs
+    if "digital lending" in title.lower() or "lending" in title.lower() or "nbfc" in title.lower() or "loan" in title.lower():
+        print("[MAP Generator Agent] Digital Lending context parsed. Emitting compliance action items...")
+        return {
+            "maps": [
+                {
+                    "title": "Key Fact Statement (KFS) Display Module on Digital Lending Portals",
+                    "description": "Implement a standardized Key Fact Statement (KFS) display module on all customer-facing digital lending portals showing APR, processing fees, penal charges, and total cost of borrowing before loan agreement execution.",
+                    "obligation_type": "MANDATORY",
+                    "classification": "TECHNICAL",
+                    "deliverable": "KFS display module live on all digital lending portals with APR calculator and fee disclosure.",
+                    "deadline": "2026-10-01",
+                    "priority": "HIGH",
+                    "risk_level": "MEDIUM",
+                    "risk_description": "Non-disclosure of lending charges violates RBI fair practices code and exposes the bank to consumer complaints and regulatory action.",
+                    "section_reference": "Section 2.3",
+                    "evidence_required": [
+                        "Screenshot of KFS display on lending portal",
+                        "APR calculation formula documentation",
+                        "UI/UX compliance review sign-off"
+                    ],
+                    "regulatory_keywords": ["Digital Lending", "KFS", "APR", "Fair Practices", "Disclosure"],
+                    "confidence_score": 0.93,
+                    "flagged_for_review": False,
+                    "flag_reason": None,
+                    "reasoning_chain": "Step 1: Section 2.3 mandates KFS disclosure. Step 2: UI/frontend module development required, so TECHNICAL classification. Step 3: Assigned to Digital Banking IT for portal changes and Legal for disclosure content review."
+                }
+            ],
+            "skipped_provisions": []
+        }
+
+    # CERT-In Cybersecurity Incident MAPs
+    if "cert-in" in title.lower() or "cyber incident" in title.lower() or "cybersecurity incident" in title.lower() or "incident reporting" in title.lower():
+        print("[MAP Generator Agent] CERT-In Cybersecurity context parsed. Emitting compliance action items...")
+        return {
+            "maps": [
+                {
+                    "title": "CERT-In 6-Hour Incident Reporting Portal Integration",
+                    "description": "Integrate the bank's Security Operations Center (SOC) with the CERT-In incident reporting portal to enable automated submission of cybersecurity incident reports within the mandated 6-hour window from detection.",
+                    "obligation_type": "MANDATORY",
+                    "classification": "TECHNICAL",
+                    "deliverable": "Automated CERT-In incident reporting pipeline from SOC SIEM to CERT-In portal with 6-hour SLA tracking.",
+                    "deadline": "2026-07-15",
+                    "priority": "CRITICAL",
+                    "risk_level": "CRITICAL",
+                    "risk_description": "Failure to report cybersecurity incidents within 6 hours violates CERT-In directions under IT Act Section 70B, attracting heavy penalties and potential license suspension.",
+                    "section_reference": "Section 2.1",
+                    "evidence_required": [
+                        "CERT-In portal API integration test results",
+                        "SOC-to-CERT-In pipeline architecture diagram",
+                        "Simulated incident report submission confirmation"
+                    ],
+                    "regulatory_keywords": ["CERT-In", "Incident Reporting", "6-Hour", "SOC", "SIEM", "Cybersecurity"],
+                    "confidence_score": 0.97,
+                    "flagged_for_review": False,
+                    "flag_reason": None,
+                    "reasoning_chain": "Step 1: Section 2.1 mandates 6-hour incident reporting. Step 2: Requires SOC-SIEM integration with CERT-In, hence TECHNICAL. Step 3: CRITICAL priority due to tight SLA. Assigned to IT Security."
+                },
+                {
+                    "title": "180-Day ICT Log Retention and Centralized Log Management System",
+                    "description": "Implement a centralized log management system (SIEM/Log aggregator) that retains firewall, VPN, proxy, mail server, and database access logs for a rolling 180-day period with tamper-proof storage and on-demand retrieval capability for CERT-In audits.",
+                    "obligation_type": "MANDATORY",
+                    "classification": "TECHNICAL",
+                    "deliverable": "Centralized log management system with 180-day retention, tamper-proof storage, and CERT-In audit export functionality.",
+                    "deadline": "2026-09-01",
+                    "priority": "HIGH",
+                    "risk_level": "HIGH",
+                    "risk_description": "Insufficient log retention prevents forensic investigation of security incidents and violates CERT-In compliance requirements.",
+                    "section_reference": "Section 3.3",
+                    "evidence_required": [
+                        "Log management system deployment verification",
+                        "Storage capacity and retention policy configuration",
+                        "Sample log export for audit demonstration"
+                    ],
+                    "regulatory_keywords": ["Log Retention", "SIEM", "CERT-In", "Firewall Logs", "180-Day"],
+                    "confidence_score": 0.92,
+                    "flagged_for_review": False,
+                    "flag_reason": None,
+                    "reasoning_chain": "Step 1: Section 3.3 mandates 180-day log retention. Step 2: Centralized SIEM deployment is a technical infrastructure project. Step 3: Assigned to IT Security and Core Banking IT."
                 }
             ],
             "skipped_provisions": []

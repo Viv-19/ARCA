@@ -489,50 +489,50 @@ function App() {
       {/* Sidebar Navigation */}
       <div className="sidebar">
         <div className="logo-container">
-          <Shield className="logo-icon" size={30} color="#3b82f6" style={{ filter: 'drop-shadow(0 0 8px rgba(59,130,246,0.3))' }} />
+          <Shield className="logo-icon" size={26} color="#3b82f6" />
           <div>
             <div className="logo-text">ARCA</div>
-            <div style={{fontSize: '11px', color: 'var(--text-muted)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '5px', marginTop: '2px'}}>
-              Compliance Hub
-              <span className={`animate-pulse-slow`} style={{width: '6px', height: '6px', borderRadius: '50%', background: isConnected ? 'var(--color-success)' : 'var(--color-danger)'}} title={isConnected ? "WebSocket Connected" : "WebSocket Offline"} />
+            <div style={{fontSize: '10px', color: '#64748b', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '5px', marginTop: '1px'}}>
+              COMPLIANCE HUB
+              <span className="animate-pulse-slow" style={{width: '6px', height: '6px', borderRadius: '50%', background: isConnected ? '#10b981' : '#ef4444'}} title={isConnected ? "WebSocket Connected" : "WebSocket Offline"} />
             </div>
           </div>
         </div>
         
         <div className="nav-menu">
           <div className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => setActiveTab('dashboard')}>
-            <Activity size={18} />
+            <Activity size={16} />
             Executive Panel
           </div>
           <div className={`nav-item ${activeTab === 'review' ? 'active' : ''}`} onClick={() => setActiveTab('review')}>
-            <Layers size={18} />
+            <Layers size={16} />
             Officer Review Queue
             {pendingMaps.length > 0 && <span className="badge badge-warning" style={{marginLeft: 'auto'}}>{pendingMaps.length}</span>}
           </div>
           <div className={`nav-item ${activeTab === 'tracker' ? 'active' : ''}`} onClick={() => setActiveTab('tracker')}>
-            <Send size={18} />
+            <Send size={16} />
             Dispatch Tracker
             {activeDispatches.length > 0 && <span className="badge badge-info" style={{marginLeft: 'auto'}}>{activeDispatches.length}</span>}
           </div>
           <div className={`nav-item ${activeTab === 'portal' ? 'active' : ''}`} onClick={() => setActiveTab('portal')}>
-            <Users size={18} />
+            <Users size={16} />
             Department Board
           </div>
           <div className={`nav-item ${activeTab === 'ingestion' ? 'active' : ''}`} onClick={() => setActiveTab('ingestion')}>
-            <Upload size={18} />
+            <Upload size={16} />
             Circular Ingest
           </div>
         </div>
 
         {/* Real-time Socket.io Notification Log widget */}
-        <div className="glass-panel" style={{marginTop: 'auto', padding: '20px', fontSize: '12px'}}>
-          <div style={{fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px', color: '#e5e7eb', letterSpacing: '0.5px'}}>
-            <Cpu size={14} color="var(--color-success)" />
+        <div style={{marginTop: 'auto', padding: '12px 0', fontSize: '11px'}}>
+          <div style={{fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px', color: '#94a3b8', letterSpacing: '0.5px'}}>
+            <Cpu size={12} color="#10b981" />
             LIVE PIPELINE STREAM
           </div>
-          <div className="terminal-screen" style={{maxHeight: '180px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px'}}>
+          <div className="terminal-screen" style={{maxHeight: '160px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '6px'}}>
             {wsLogs.length === 0 ? (
-              <span style={{color: 'var(--text-muted)', fontStyle: 'italic'}}>Awaiting real-time socket updates from compliance pipeline agents...</span>
+              <span style={{color: '#64748b', fontStyle: 'italic'}}>Awaiting real-time compliance updates from pipeline agents...</span>
             ) : (
               wsLogs.map((log, idx) => <div key={idx}>{log}</div>)
             )}
@@ -544,34 +544,34 @@ function App() {
       <div className="main-content">
         
         {/* Unified Command Center Welcome Header */}
-        <div style={{ background: 'rgba(59, 130, 246, 0.02)', border: '1px solid var(--border-glow)', borderRadius: '16px', padding: '24px 32px', marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ background: '#ffffff', border: '1px solid var(--border-subtle)', borderRadius: '12px', padding: '20px 28px', marginBottom: '28px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
           <div>
-            <h1 style={{ margin: 0, fontSize: '26px', fontWeight: 800, fontFamily: "'Space Grotesk', sans-serif", color: 'white', letterSpacing: '-0.5px' }}>ARCA Command Center</h1>
-            <p style={{ color: 'var(--text-muted)', margin: '6px 0 0 0', fontSize: '13px', fontWeight: 500 }}>Autonomous Compliance Tracking, Mapping & Routing Engine • Canara Bank Edition</p>
+            <h1 style={{ margin: 0, fontSize: '24px', fontWeight: 800, fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'var(--text-main)', letterSpacing: '-0.5px' }}>ARCA Command Center</h1>
+            <p style={{ color: 'var(--text-light)', margin: '4px 0 0 0', fontSize: '13px', fontWeight: 500 }}>Autonomous Compliance Tracking, Mapping & Routing Engine • Canara Bank Edition</p>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontWeight: 700, fontSize: '14px', color: '#f3f4f6' }}>Compliance Officer</div>
-              <div style={{ fontSize: '11px', color: 'var(--color-success)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'flex-end', marginTop: '2px' }}>
-                <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: 'var(--color-success)' }} />
+              <div style={{ fontWeight: 700, fontSize: '13.5px', color: 'var(--text-main)' }}>Compliance Officer</div>
+              <div style={{ fontSize: '11px', color: 'var(--text-light)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'flex-end', marginTop: '1px' }}>
+                <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#10b981' }} />
                 System Active
               </div>
             </div>
-            <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--primary), var(--accent))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: 'white', fontSize: '16px', boxShadow: '0 4px 10px rgba(59, 130, 246, 0.25)' }}>CO</div>
+            <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: 'white', fontSize: '14px', boxShadow: '0 2px 8px rgba(15, 23, 42, 0.1)' }}>CO</div>
           </div>
         </div>
 
         {/* TAB 1: EXECUTIVE PANEL (COMPLIANCE POSTURE) */}
         {activeTab === 'dashboard' && (
           <div>
-            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px'}}>
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
               <div>
-                <h2 style={{margin: 0, fontSize: '22px', fontWeight: 700, fontFamily: "'Space Grotesk', sans-serif"}}>Executive Scorecard</h2>
-                <p style={{color: 'var(--text-muted)', margin: '4px 0 0 0', fontSize: '13px'}}>Real-time audit aggregations, overdue counts, and systemic risk posture</p>
+                <h2 style={{margin: 0, fontSize: '20px', fontWeight: 700, fontFamily: "'Plus Jakarta Sans', sans-serif"}}>Executive Scorecard</h2>
+                <p style={{color: 'var(--text-light)', margin: '4px 0 0 0', fontSize: '12.5px'}}>Real-time audit aggregations, overdue counts, and systemic risk posture</p>
               </div>
-              <div style={{display: 'flex', gap: '12px'}}>
+              <div style={{display: 'flex', gap: '10px'}}>
                 <button className="btn-secondary" onClick={handleAlertScan}>
-                  <RefreshCw size={14} />
+                  <RefreshCw size={12} />
                   Run Alert Check
                 </button>
               </div>
@@ -582,13 +582,13 @@ function App() {
               <div className="glass-panel metric-card" style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
                 <div>
                   <div className="metric-title">Compliance Index</div>
-                  <div className="metric-value" style={{color: overallScore >= 85 ? 'var(--color-success)' : overallScore >= 70 ? 'var(--color-warning)' : 'var(--color-danger)'}}>{overallScore}%</div>
+                  <div className="metric-value" style={{color: overallScore >= 85 ? '#059669' : overallScore >= 70 ? '#d97706' : '#dc2626'}}>{overallScore}%</div>
                 </div>
                 <div className="progress-ring-container">
-                  <div className="progress-text" style={{color: overallScore >= 85 ? 'var(--color-success)' : overallScore >= 70 ? 'var(--color-warning)' : 'var(--color-danger)'}}>{overallScore}%</div>
+                  <div className="progress-text" style={{color: 'var(--text-main)'}}>{overallScore}%</div>
                   <svg width="80" height="80">
-                    <circle cx="40" cy="40" r="32" fill="transparent" stroke="rgba(255,255,255,0.03)" strokeWidth="6" />
-                    <circle cx="40" cy="40" r="32" fill="transparent" stroke={overallScore >= 85 ? 'var(--color-success)' : overallScore >= 70 ? 'var(--color-warning)' : 'var(--color-danger)'} strokeWidth="6" 
+                    <circle cx="40" cy="40" r="32" fill="transparent" stroke="#cbd5e1" strokeWidth="5" />
+                    <circle cx="40" cy="40" r="32" fill="transparent" stroke={overallScore >= 85 ? '#10b981' : overallScore >= 70 ? '#f59e0b' : '#ef4444'} strokeWidth="5" 
                       strokeDasharray={`${2 * Math.PI * 32}`} 
                       strokeDashoffset={`${2 * Math.PI * 32 * (1 - overallScore/100)}`} 
                       strokeLinecap="round"
@@ -601,40 +601,40 @@ function App() {
               <div className="glass-panel metric-card">
                 <div className="metric-title">Active Assigned MAPs</div>
                 <div className="metric-value">{totalActive}</div>
-                <div className="badge badge-info" style={{marginTop: '6px'}}><CheckSquare size={12} /> Active compliance pipelines</div>
+                <div className="badge badge-info" style={{marginTop: '4px'}}><CheckSquare size={11} /> Active compliance pipelines</div>
               </div>
 
               <div className="glass-panel metric-card warning-border">
                 <div className="metric-title">At Risk Items</div>
                 <div className="metric-value" style={{color: 'var(--color-warning)'}}>{totalAtRisk}</div>
-                <div className="badge badge-warning" style={{marginTop: '6px'}}><Clock size={12} /> Deadline approaching (7 days)</div>
+                <div className="badge badge-warning" style={{marginTop: '4px'}}><Clock size={11} /> Near deadline (7 days)</div>
               </div>
 
               <div className="glass-panel metric-card danger-border">
                 <div className="metric-title">Overdue Penalties</div>
                 <div className="metric-value" style={{color: 'var(--color-danger)'}}>{totalOverdue}</div>
-                <div className="badge badge-danger" style={{marginTop: '6px'}}><AlertTriangle size={12} /> Escalated past limit</div>
+                <div className="badge badge-danger" style={{marginTop: '4px'}}><AlertTriangle size={11} /> Escalated past limit</div>
               </div>
             </div>
 
             {/* Alerts Panel */}
             {alerts.length > 0 && (
-              <div className="glass-panel" style={{padding: '24px', marginBottom: '32px', borderLeft: '4px solid var(--color-danger)'}}>
-                <h3 style={{margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-danger)', fontSize: '16px', fontWeight: 700}}>
-                  <AlertTriangle size={18} />
+              <div className="glass-panel" style={{padding: '20px', marginBottom: '28px', borderLeft: '4px solid var(--color-danger)', background: 'var(--color-danger-bg)'}}>
+                <h3 style={{margin: '0 0 14px 0', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-danger)', fontSize: '15px', fontWeight: 700}}>
+                  <AlertTriangle size={16} />
                   System Risk Escalation Warnings
                 </h3>
-                <div style={{display: 'flex', flexDirection: 'column', gap: '12px'}}>
+                <div style={{display: 'flex', flexDirection: 'column', gap: '10px'}}>
                   {alerts.map((al) => (
-                    <div key={al.id} style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 18px', background: 'rgba(255,255,255,0.01)', borderRadius: '10px', border: '1px solid var(--border-subtle)'}}>
-                      <div style={{display: 'flex', gap: '12px', alignItems: 'center'}}>
+                    <div key={al.id} style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', background: '#ffffff', borderRadius: '8px', border: '1px solid var(--color-danger-border)'}}>
+                      <div style={{display: 'flex', gap: '10px', alignItems: 'center'}}>
                         <span className={`badge ${al.severity === 'CRITICAL' ? 'badge-danger' : 'badge-warning'}`}>{al.severity}</span>
                         <div>
-                          <div style={{fontWeight: 600, color: '#f3f4f6'}}>{al.message}</div>
-                          <div style={{fontSize: '11px', color: 'var(--text-muted)', marginTop: '3px'}}>{new Date(al.createdAt).toLocaleString()}</div>
+                          <div style={{fontWeight: 600, color: 'var(--text-main)'}}>{al.message}</div>
+                          <div style={{fontSize: '11px', color: 'var(--text-light)', marginTop: '2px'}}>{new Date(al.createdAt).toLocaleString()}</div>
                         </div>
                       </div>
-                      <button className="btn-secondary" style={{padding: '6px 14px', fontSize: '12px'}} onClick={() => handleMarkAlertRead(al.id)}>Resolve</button>
+                      <button className="btn-secondary" style={{padding: '6px 12px', fontSize: '11.5px'}} onClick={() => handleMarkAlertRead(al.id)}>Resolve</button>
                     </div>
                   ))}
                 </div>
@@ -642,36 +642,36 @@ function App() {
             )}
 
             {/* Columns split: Departments scorecards vs activity stream */}
-            <div style={{display: 'grid', gridTemplateColumns: '1.8fr 1.2fr', gap: '32px'}}>
+            <div style={{display: 'grid', gridTemplateColumns: '1.8fr 1.2fr', gap: '28px'}}>
               {/* Departments breakdown */}
-              <div className="glass-panel" style={{padding: '32px'}}>
-                <h3 style={{margin: '0 0 24px 0', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '18px', fontWeight: 700, fontFamily: "'Space Grotesk', sans-serif"}}>
-                  <Users size={20} color="var(--primary)" />
+              <div className="glass-panel" style={{padding: '24px'}}>
+                <h3 style={{margin: '0 0 20px 0', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '16px', fontWeight: 700, fontFamily: "'Plus Jakarta Sans', sans-serif"}}>
+                  <Users size={16} color="var(--primary-accent)" />
                   Department Scorecards Breakdown
                 </h3>
-                <div style={{display: 'flex', flexDirection: 'column', gap: '18px'}}>
+                <div style={{display: 'flex', flexDirection: 'column', gap: '14px'}}>
                   {departments.map((dept) => (
-                    <div key={dept.id} style={{padding: '18px', background: 'rgba(255,255,255,0.008)', border: '1px solid var(--border-subtle)', borderRadius: '14px', transition: 'all 0.2s ease'}}>
-                      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px'}}>
+                    <div key={dept.id} style={{padding: '14px', background: '#f8fafc', border: '1px solid var(--border-subtle)', borderRadius: '10px'}}>
+                      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px'}}>
                         <div>
-                          <div style={{fontWeight: 700, fontSize: '15px', color: 'white'}}>{dept.name}</div>
-                          <div style={{fontSize: '12px', color: 'var(--text-muted)'}}>{dept.email}</div>
+                          <div style={{fontWeight: 700, fontSize: '14px', color: 'var(--text-main)'}}>{dept.name}</div>
+                          <div style={{fontSize: '11.5px', color: 'var(--text-light)'}}>{dept.email}</div>
                         </div>
                         <div style={{textAlign: 'right'}}>
-                          <div style={{fontSize: '18px', fontWeight: 700, color: dept.score >= 85 ? 'var(--color-success)' : dept.score >= 70 ? 'var(--color-warning)' : 'var(--color-danger)'}}>{dept.score}%</div>
-                          <span className={`badge ${dept.riskLevel === 'LOW' ? 'badge-success' : dept.riskLevel === 'MEDIUM' ? 'badge-warning' : 'badge-danger'}`} style={{marginTop: '4px', padding: '3px 8px', fontSize: '10px'}}>{dept.riskLevel} Risk</span>
+                          <div style={{fontSize: '15px', fontWeight: 700, color: dept.score >= 85 ? '#059669' : dept.score >= 70 ? '#d97706' : '#dc2626'}}>{dept.score}%</div>
+                          <span className={`badge ${dept.riskLevel === 'LOW' ? 'badge-success' : dept.riskLevel === 'MEDIUM' ? 'badge-warning' : 'badge-danger'}`} style={{marginTop: '2px', padding: '2px 6px', fontSize: '9px'}}>{dept.riskLevel} Risk</span>
                         </div>
                       </div>
                       
                       {/* Bar graph */}
-                      <div style={{width: '100%', height: '6px', background: 'rgba(255,255,255,0.04)', borderRadius: '3px', overflow: 'hidden', marginBottom: '10px'}}>
-                        <div style={{width: `${dept.score}%`, height: '100%', background: dept.score >= 85 ? 'var(--color-success)' : dept.score >= 70 ? 'var(--color-warning)' : 'var(--color-danger)', borderRadius: '3px'}} />
+                      <div style={{width: '100%', height: '5px', background: '#cbd5e1', borderRadius: '3px', overflow: 'hidden', marginBottom: '8px'}}>
+                        <div style={{width: `${dept.score}%`, height: '100%', background: dept.score >= 85 ? '#10b981' : dept.score >= 70 ? '#f59e0b' : '#ef4444', borderRadius: '3px'}} />
                       </div>
                       
                       {/* Counts */}
-                      <div style={{display: 'flex', gap: '16px', fontSize: '12px', color: 'var(--text-muted)'}}>
-                        <div>Tasks Overdue: <span style={{fontWeight: 700, color: dept.overdueCount > 0 ? 'var(--color-danger)' : '#9ca3af'}}>{dept.overdueCount}</span></div>
-                        <div>At Risk: <span style={{fontWeight: 700, color: dept.atRiskCount > 0 ? 'var(--color-warning)' : '#9ca3af'}}>{dept.atRiskCount}</span></div>
+                      <div style={{display: 'flex', gap: '14px', fontSize: '11.5px', color: 'var(--text-light)'}}>
+                        <div>Tasks Overdue: <span style={{fontWeight: 700, color: dept.overdueCount > 0 ? '#ef4444' : '#64748b'}}>{dept.overdueCount}</span></div>
+                        <div>At Risk: <span style={{fontWeight: 700, color: dept.atRiskCount > 0 ? '#f59e0b' : '#64748b'}}>{dept.atRiskCount}</span></div>
                       </div>
                     </div>
                   ))}
@@ -679,24 +679,24 @@ function App() {
               </div>
 
               {/* Activity log */}
-              <div className="glass-panel" style={{padding: '32px'}}>
-                <h3 style={{margin: '0 0 24px 0', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '18px', fontWeight: 700, fontFamily: "'Space Grotesk', sans-serif"}}>
-                  <Activity size={20} color="var(--accent)" />
+              <div className="glass-panel" style={{padding: '24px'}}>
+                <h3 style={{margin: '0 0 20px 0', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '16px', fontWeight: 700, fontFamily: "'Plus Jakarta Sans', sans-serif"}}>
+                  <Activity size={16} color="var(--primary-accent)" />
                   Immutable System Audit Logs
                 </h3>
                 <div className="timeline">
                   {recentLogs.map((log) => (
                     <div key={log.id} className="timeline-item">
-                      <div className="timeline-dot" style={{ background: log.eventType === 'DOCUMENT_INGESTED' ? 'var(--color-info)' : log.eventType === 'MAP_APPROVED' ? 'var(--color-success)' : 'var(--primary)' }} />
+                      <div className="timeline-dot" style={{ background: log.eventType === 'DOCUMENT_INGESTED' ? '#3b82f6' : log.eventType === 'MAP_APPROVED' ? '#10b981' : '#6366f1' }} />
                       <div className="timeline-header">
                         <span className={`badge ${log.eventType === 'DOCUMENT_INGESTED' ? 'badge-info' : log.eventType === 'MAP_APPROVED' ? 'badge-success' : 'badge-purple'}`} style={{fontSize: '9px', padding: '2px 6px'}}>{log.eventType}</span>
                         <span className="timeline-time">{new Date(log.createdAt).toLocaleTimeString()}</span>
                       </div>
-                      <div style={{fontWeight: 600, fontSize: '13px', margin: '4px 0', color: '#e5e7eb'}}>{log.description}</div>
-                      <div style={{fontSize: '11px', color: 'var(--text-muted)'}}>Actor: {log.actor}</div>
+                      <div style={{fontWeight: 600, fontSize: '12.5px', margin: '4px 0', color: 'var(--text-main)'}}>{log.description}</div>
+                      <div style={{fontSize: '11px', color: 'var(--text-light)'}}>Actor: {log.actor}</div>
                     </div>
                   ))}
-                  {recentLogs.length === 0 && <p style={{color: 'var(--text-muted)', fontSize: '13px', textAlign: 'center', padding: '20px 0'}}>No audit log items generated yet.</p>}
+                  {recentLogs.length === 0 && <p style={{color: 'var(--text-light)', fontSize: '12px', textAlign: 'center', padding: '20px 0'}}>No audit log items generated yet.</p>}
                 </div>
               </div>
             </div>
@@ -706,25 +706,25 @@ function App() {
         {/* TAB 2: OFFICER REVIEW QUEUE */}
         {activeTab === 'review' && (
           <div>
-            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px'}}>
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
               <div>
-                <h2 style={{margin: 0, fontSize: '22px', fontWeight: 700, fontFamily: "'Space Grotesk', sans-serif"}}>Officer Review Gate</h2>
-                <p style={{color: 'var(--text-muted)', margin: '4px 0 0 0', fontSize: '13px'}}>Approve, edit, or reject AI-extracted provisions and Action Points prior to routing dispatch</p>
+                <h2 style={{margin: 0, fontSize: '20px', fontWeight: 700, fontFamily: "'Plus Jakarta Sans', sans-serif"}}>Officer Review Gate</h2>
+                <p style={{color: 'var(--text-light)', margin: '4px 0 0 0', fontSize: '12.5px'}}>Approve, edit, or reject AI-extracted provisions and Action Points prior to routing dispatch</p>
               </div>
               {bulkList.length > 0 && (
                 <button className="btn-primary" onClick={handleBulkApprove}>
-                  <CheckSquare size={16} />
+                  <CheckSquare size={14} />
                   Bulk Dispatch {bulkList.length} Items
                 </button>
               )}
             </div>
 
-            <div className="glass-panel" style={{padding: '32px'}}>
+            <div className="glass-panel" style={{padding: '24px'}}>
               {pendingMaps.length === 0 ? (
-                <div style={{textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)'}}>
-                  <FileCheck size={48} style={{opacity: 0.3, marginBottom: '16px', color: 'var(--color-success)'}} />
-                  <div style={{fontSize: '16px', fontWeight: 700, color: 'white'}}>Review Queue Clear</div>
-                  <p style={{fontSize: '14px', maxWidth: '400px', margin: '8px auto 0 auto'}}>All compliance provisions have been triaged, approved, and dispatched to their respective departments.</p>
+                <div style={{textAlign: 'center', padding: '48px 0', color: 'var(--text-light)'}}>
+                  <FileCheck size={40} style={{opacity: 0.4, marginBottom: '12px', color: '#10b981'}} />
+                  <div style={{fontSize: '15px', fontWeight: 700, color: 'var(--text-main)'}}>Review Queue Clear</div>
+                  <p style={{fontSize: '13px', maxWidth: '380px', margin: '6px auto 0 auto'}}>All compliance provisions have been triaged, approved, and dispatched to their respective departments.</p>
                 </div>
               ) : (
                 <div className="table-container">
@@ -746,20 +746,20 @@ function App() {
                     </thead>
                     <tbody>
                       {pendingMaps.map((map) => (
-                        <tr key={map.id} style={{ borderLeft: map.flaggedForReview ? '3px solid var(--color-warning)' : 'none' }}>
+                        <tr key={map.id} style={{ borderLeft: map.flaggedForReview ? '3px solid #d97706' : 'none' }}>
                           <td>
                             <input type="checkbox" checked={bulkList.includes(map.id)} onChange={() => toggleBulk(map.id)} />
                           </td>
-                          <td><span style={{fontFamily: 'monospace', fontWeight: 700, color: '#60a5fa'}}>{map.mapCode}</span></td>
+                          <td><span style={{fontFamily: 'monospace', fontWeight: 700, color: 'var(--primary-accent)'}}>{map.mapCode}</span></td>
                           <td>
                             <div>
-                              <div style={{fontWeight: 700, color: '#f3f4f6'}}>{map.title}</div>
-                              <div style={{fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px'}}>{map.sectionReference || 'General Obligations'}</div>
+                              <div style={{fontWeight: 700, color: 'var(--text-main)'}}>{map.title}</div>
+                              <div style={{fontSize: '11.5px', color: 'var(--text-light)', marginTop: '2px'}}>{map.sectionReference || 'General Obligations'}</div>
                             </div>
                           </td>
                           <td>
-                            <div style={{fontSize: '13px', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{map.document?.title}</div>
-                            <span className="badge badge-info" style={{fontSize: '9px', marginTop: '4px', padding: '2px 6px'}}>{map.document?.documentId || 'RBI'}</span>
+                            <div style={{fontSize: '12.5px', maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 500}}>{map.document?.title}</div>
+                            <span className="badge badge-info" style={{fontSize: '9px', marginTop: '2px', padding: '1px 4px'}}>{map.document?.documentId || 'RBI'}</span>
                           </td>
                           <td>
                             <span className={`badge ${map.classification === 'TECHNICAL' ? 'badge-info' : 'badge-purple'}`}>
@@ -773,18 +773,18 @@ function App() {
                           </td>
                           <td>
                             <div style={{display: 'flex', alignItems: 'center', gap: '6px'}}>
-                              <div style={{width: '40px', height: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '2px', overflow: 'hidden'}}>
-                                <div style={{width: `${map.confidenceScore * 100}%`, height: '100%', background: 'var(--primary)'}} />
+                              <div style={{width: '40px', height: '4px', background: '#cbd5e1', borderRadius: '2px', overflow: 'hidden'}}>
+                                <div style={{width: `${map.confidenceScore * 100}%`, height: '100%', background: 'var(--primary-accent)'}} />
                               </div>
-                              <span style={{fontSize: '12px', fontWeight: 700}}>{Math.round(map.confidenceScore * 100)}%</span>
+                              <span style={{fontSize: '11.5px', fontWeight: 700}}>{Math.round(map.confidenceScore * 100)}%</span>
                             </div>
                           </td>
                           <td>
-                            <div style={{display: 'flex', gap: '8px', justifyContent: 'flex-end'}}>
-                              <button className="btn-secondary" style={{padding: '6px 12px', fontSize: '12px'}} onClick={() => openDetailModal(map)}>View</button>
-                              <button className="btn-secondary" style={{padding: '6px 12px', fontSize: '12px', color: 'var(--primary)'}} onClick={() => openEditModal(map)}>Edit</button>
-                              <button className="btn-primary" style={{padding: '6px 14px', fontSize: '12px', background: 'var(--color-success)', boxShadow: 'none'}} onClick={() => handleApproveMap(map.id)}>Approve</button>
-                              <button className="btn-secondary" style={{padding: '6px 12px', fontSize: '12px', color: 'var(--color-danger)'}} onClick={() => handleRejectMap(map.id)}>Reject</button>
+                            <div style={{display: 'flex', gap: '6px', justifyContent: 'flex-end'}}>
+                              <button className="btn-secondary" style={{padding: '5px 10px', fontSize: '11.5px'}} onClick={() => openDetailModal(map)}>View</button>
+                              <button className="btn-secondary" style={{padding: '5px 10px', fontSize: '11.5px', color: 'var(--primary-accent)'}} onClick={() => openEditModal(map)}>Edit</button>
+                              <button className="btn-primary" style={{padding: '5px 12px', fontSize: '11.5px', background: '#059669', boxShadow: 'none'}} onClick={() => handleApproveMap(map.id)}>Approve</button>
+                              <button className="btn-secondary" style={{padding: '5px 10px', fontSize: '11.5px', color: '#dc2626'}} onClick={() => handleRejectMap(map.id)}>Reject</button>
                             </div>
                           </td>
                         </tr>
@@ -797,22 +797,22 @@ function App() {
           </div>
         )}
 
-        {/* TAB 3: DISPATCH & ROUTING TRACKER (NEW!) */}
+        {/* TAB 3: DISPATCH & ROUTING TRACKER */}
         {activeTab === 'tracker' && (
           <div>
-            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px'}}>
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
               <div>
-                <h2 style={{margin: 0, fontSize: '22px', fontWeight: 700, fontFamily: "'Space Grotesk', sans-serif"}}>Dispatch & Routing Tracker</h2>
-                <p style={{color: 'var(--text-muted)', margin: '4px 0 0 0', fontSize: '13px'}}>Live audit trail tracking automated assignments, email notifications, and JIRA board synchronization</p>
+                <h2 style={{margin: 0, fontSize: '20px', fontWeight: 700, fontFamily: "'Plus Jakarta Sans', sans-serif"}}>Dispatch & Routing Tracker</h2>
+                <p style={{color: 'var(--text-light)', margin: '4px 0 0 0', fontSize: '12.5px'}}>Live audit trail tracking automated assignments, email notifications, and JIRA board synchronization</p>
               </div>
             </div>
 
-            <div className="glass-panel" style={{padding: '32px'}}>
+            <div className="glass-panel" style={{padding: '24px'}}>
               {activeDispatches.length === 0 ? (
-                <div style={{textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)'}}>
-                  <Send size={48} style={{opacity: 0.3, marginBottom: '16px', color: 'var(--primary)'}} />
-                  <div style={{fontSize: '16px', fontWeight: 700, color: 'white'}}>No Active Dispatches</div>
-                  <p style={{fontSize: '14px', maxWidth: '400px', margin: '8px auto 0 auto'}}>Approve MAP tasks from the Review Gate to trigger automated routing dispatches to banking departments.</p>
+                <div style={{textAlign: 'center', padding: '48px 0', color: 'var(--text-light)'}}>
+                  <Send size={40} style={{opacity: 0.4, marginBottom: '12px', color: 'var(--primary-accent)'}} />
+                  <div style={{fontSize: '15px', fontWeight: 700, color: 'var(--text-main)'}}>No Active Dispatches</div>
+                  <p style={{fontSize: '13px', maxWidth: '380px', margin: '6px auto 0 auto'}}>Approve MAP tasks from the Review Gate to trigger automated routing dispatches to banking departments.</p>
                 </div>
               ) : (
                 <div className="table-container">
@@ -836,34 +836,34 @@ function App() {
 
                         return (
                           <tr key={map.id}>
-                            <td><span style={{fontFamily: 'monospace', fontWeight: 700, color: '#60a5fa'}}>{map.mapCode}</span></td>
+                            <td><span style={{fontFamily: 'monospace', fontWeight: 700, color: 'var(--primary-accent)'}}>{map.mapCode}</span></td>
                             <td>
                               <div>
-                                <div style={{fontWeight: 700, color: 'white'}}>{map.title}</div>
-                                <div style={{fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px', maxWidth: '240px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{map.description}</div>
+                                <div style={{fontWeight: 700, color: 'var(--text-main)'}}>{map.title}</div>
+                                <div style={{fontSize: '11.5px', color: 'var(--text-light)', marginTop: '2px', maxWidth: '240px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{map.description}</div>
                               </div>
                             </td>
                             <td>
                               <div>
-                                <div style={{fontWeight: 600}}>{deptName}</div>
-                                <div style={{fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px'}}>{deptEmail}</div>
+                                <div style={{fontWeight: 600, color: 'var(--text-main)'}}>{deptName}</div>
+                                <div style={{fontSize: '11px', color: 'var(--text-light)', marginTop: '1px'}}>{deptEmail}</div>
                               </div>
                             </td>
                             <td>
-                              <div style={{display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--color-success)'}}>
-                                <span style={{width: '6px', height: '6px', borderRadius: '50%', background: 'var(--color-success)'}} />
-                                <span style={{fontSize: '13px', fontWeight: 600}}>Sent & Logged</span>
+                              <div style={{display: 'flex', alignItems: 'center', gap: '6px', color: '#059669'}}>
+                                <span style={{width: '6px', height: '6px', borderRadius: '50%', background: '#10b981'}} />
+                                <span style={{fontSize: '12.5px', fontWeight: 600}}>Sent & Logged</span>
                               </div>
                             </td>
                             <td>
                               {map.jiraTicketId ? (
-                                <span className="badge badge-info" style={{background: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.15)', color: '#38bdf8'}}>
+                                <span className="badge badge-info" style={{background: 'var(--color-info-bg)', border: '1px solid var(--color-info-border)', color: 'var(--color-info)'}}>
                                   <Code size={11} /> {map.jiraTicketId}
                                 </span>
                               ) : isTech ? (
                                 <span className="badge badge-warning" style={{fontSize: '10px'}}>Sync Pending</span>
                               ) : (
-                                <span className="badge badge-success" style={{background: 'rgba(255,255,255,0.01)', border: '1px solid var(--border-subtle)', color: 'var(--text-muted)', fontSize: '10px'}}>Policy Only</span>
+                                <span className="badge badge-success" style={{background: '#f8fafc', border: '1px solid var(--border-subtle)', color: 'var(--text-light)', fontSize: '10px'}}>Policy Only</span>
                               )}
                             </td>
                             <td>
@@ -881,7 +881,7 @@ function App() {
                               </span>
                             </td>
                             <td style={{textAlign: 'right'}}>
-                              <button className="btn-secondary" style={{padding: '6px 12px', fontSize: '12px'}} onClick={() => openDetailModal(map)}>Audit Log</button>
+                              <button className="btn-secondary" style={{padding: '5px 10px', fontSize: '11.5px'}} onClick={() => openDetailModal(map)}>Audit Log</button>
                             </td>
                           </tr>
                         );
@@ -897,14 +897,14 @@ function App() {
         {/* TAB 4: DEPARTMENT KANBAN BOARD */}
         {activeTab === 'portal' && (
           <div>
-            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px'}}>
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
               <div>
-                <h2 style={{margin: 0, fontSize: '22px', fontWeight: 700, fontFamily: "'Space Grotesk', sans-serif"}}>Department board</h2>
-                <p style={{color: 'var(--text-muted)', margin: '4px 0 0 0', fontSize: '13px'}}>Track active compliance operations, review validation script runs, and submit files proof</p>
+                <h2 style={{margin: 0, fontSize: '20px', fontWeight: 700, fontFamily: "'Plus Jakarta Sans', sans-serif"}}>Department Board</h2>
+                <p style={{color: 'var(--text-light)', margin: '4px 0 0 0', fontSize: '12.5px'}}>Track active compliance operations, review validation script runs, and submit files proof</p>
               </div>
-              <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
-                <label style={{margin: 0, fontSize: '13px', fontWeight: 700, color: 'var(--text-muted)'}}>Active Department:</label>
-                <select style={{width: '260px', padding: '10px 14px', borderRadius: '10px'}} value={selectedDeptId} onChange={(e) => setSelectedDeptId(e.target.value)}>
+              <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+                <label style={{margin: 0, fontSize: '12px', fontWeight: 700, color: 'var(--text-light)'}}>Active Department:</label>
+                <select style={{width: '260px', padding: '8px 12px', borderRadius: '8px'}} value={selectedDeptId} onChange={(e) => setSelectedDeptId(e.target.value)}>
                   {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
                 </select>
               </div>
@@ -923,22 +923,22 @@ function App() {
                   {deptMaps.filter(m => m.status === 'DISPATCHED').map(map => (
                     <div key={map.id} className="kanban-card" onClick={() => openDetailModal(map)}>
                       <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '10px'}}>
-                        <span style={{fontFamily: 'monospace', fontSize: '11px', fontWeight: 700, color: '#60a5fa'}}>{map.mapCode}</span>
-                        <span className={`badge ${map.priority === 'CRITICAL' ? 'badge-danger' : 'badge-warning'}`} style={{fontSize: '9px', padding: '2px 6px'}}>{map.priority}</span>
+                        <span style={{fontFamily: 'monospace', fontSize: '11px', fontWeight: 700, color: 'var(--primary-accent)'}}>{map.mapCode}</span>
+                        <span className={`badge ${map.priority === 'CRITICAL' ? 'badge-danger' : 'badge-warning'}`} style={{fontSize: '9px', padding: '1px 4px'}}>{map.priority}</span>
                       </div>
-                      <div style={{fontWeight: 700, fontSize: '14px', marginBottom: '6px', color: 'white'}}>{map.title}</div>
-                      <div style={{fontSize: '12px', color: 'var(--text-muted)', marginBottom: '16px', lineHeight: '1.4'}}>{map.description.slice(0, 90)}...</div>
-                      <button className="btn-primary" style={{width: '100%', padding: '8px 0', fontSize: '12px', justifyContent: 'center', borderRadius: '8px'}} onClick={(e) => {
+                      <div style={{fontWeight: 700, fontSize: '13.5px', marginBottom: '6px', color: 'var(--text-main)'}}>{map.title}</div>
+                      <div style={{fontSize: '12px', color: 'var(--text-light)', marginBottom: '14px', lineHeight: '1.4'}}>{map.description.slice(0, 90)}...</div>
+                      <button className="btn-primary" style={{width: '100%', padding: '6px 0', fontSize: '11.5px', justifyContent: 'center', borderRadius: '6px'}} onClick={(e) => {
                         e.stopPropagation();
                         openEvidenceModal(map);
                       }}>
-                        <Upload size={12} /> Submit Proofs
+                        <Upload size={11} /> Submit Proofs
                       </button>
                     </div>
                   ))}
                   {deptMaps.filter(m => m.status === 'DISPATCHED').length === 0 && (
                     <div className="kanban-empty-state">
-                      <CheckCircleIcon size={24} />
+                      <CheckCircleIcon size={20} />
                       <div>No pending dispatches</div>
                     </div>
                   )}
@@ -946,8 +946,8 @@ function App() {
               </div>
 
               {/* Column 2: VALIDATION FAILED */}
-              <div className="kanban-column" style={{ background: 'rgba(239, 68, 68, 0.01)', borderColor: 'rgba(239, 68, 68, 0.08)' }}>
-                <div className="column-header" style={{ borderBottomColor: 'rgba(239, 68, 68, 0.1)' }}>
+              <div className="kanban-column" style={{ background: '#fef2f2', borderColor: '#fca5a5' }}>
+                <div className="column-header" style={{ borderBottomColor: '#fca5a5' }}>
                   <span style={{ color: 'var(--color-danger)' }}>VALIDATION FAILED</span>
                   <span className="badge badge-danger">{deptMaps.filter(m => m.status === 'FAILED').length}</span>
                 </div>
@@ -956,30 +956,30 @@ function App() {
                     <div key={map.id} className="kanban-card" onClick={() => openDetailModal(map)} style={{borderLeft: '3px solid var(--color-danger)'}}>
                       <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '10px'}}>
                         <span style={{fontFamily: 'monospace', fontSize: '11px', fontWeight: 700, color: 'var(--color-danger)'}}>{map.mapCode}</span>
-                        <span className="badge badge-danger" style={{fontSize: '9px', padding: '2px 6px'}}>FAILED</span>
+                        <span className="badge badge-danger" style={{fontSize: '9px', padding: '1px 4px'}}>FAILED</span>
                       </div>
-                      <div style={{fontWeight: 700, fontSize: '14px', marginBottom: '6px', color: 'white'}}>{map.title}</div>
-                      <div style={{fontSize: '12px', color: 'var(--color-danger)', marginBottom: '16px', fontWeight: 600}}>AI Audit Rejected Evidence. Review required.</div>
-                      <button className="btn-secondary" style={{width: '100%', padding: '8px 0', fontSize: '12px', justifyContent: 'center', color: '#ff8a8a', borderColor: 'rgba(239, 68, 68, 0.3)', background: 'rgba(239, 68, 68, 0.02)', borderRadius: '8px'}} onClick={(e) => {
+                      <div style={{fontWeight: 700, fontSize: '13.5px', marginBottom: '6px', color: 'var(--text-main)'}}>{map.title}</div>
+                      <div style={{fontSize: '11.5px', color: 'var(--color-danger)', marginBottom: '14px', fontWeight: 600}}>AI Audit Rejected Evidence. Review required.</div>
+                      <button className="btn-secondary" style={{width: '100%', padding: '6px 0', fontSize: '11.5px', justifyContent: 'center', color: 'var(--color-danger)', borderColor: 'var(--color-danger-border)', background: 'var(--color-danger-bg)', borderRadius: '6px'}} onClick={(e) => {
                         e.stopPropagation();
                         openEvidenceModal(map);
                       }}>
-                        <Upload size={12} /> Re-upload Proof
+                        <Upload size={11} /> Re-upload Proof
                       </button>
                     </div>
                   ))}
                   {deptMaps.filter(m => m.status === 'FAILED').length === 0 && (
                     <div className="kanban-empty-state">
-                      <CheckCircleIcon size={24} />
-                      <div>No failed compliance tasks</div>
+                      <CheckCircleIcon size={20} />
+                      <div>No failed tasks</div>
                     </div>
                   )}
                 </div>
               </div>
 
               {/* Column 3: PENDING VALIDATION */}
-              <div className="kanban-column" style={{ background: 'rgba(245, 158, 11, 0.01)', borderColor: 'rgba(245, 158, 11, 0.08)' }}>
-                <div className="column-header" style={{ borderBottomColor: 'rgba(245, 158, 11, 0.1)' }}>
+              <div className="kanban-column" style={{ background: '#fffbeb', borderColor: '#fde68a' }}>
+                <div className="column-header" style={{ borderBottomColor: '#fde68a' }}>
                   <span style={{ color: 'var(--color-warning)' }}>UNDER AI AUDIT</span>
                   <span className="badge badge-warning">{deptMaps.filter(m => ['EVIDENCE_SUBMITTED', 'VALIDATION_IN_PROGRESS', 'NEEDS_REVIEW'].includes(m.status)).length}</span>
                 </div>
@@ -988,18 +988,18 @@ function App() {
                     <div key={map.id} className="kanban-card" onClick={() => openDetailModal(map)} style={{borderLeft: '3px solid var(--color-warning)'}}>
                       <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '10px'}}>
                         <span style={{fontFamily: 'monospace', fontSize: '11px', fontWeight: 700, color: 'var(--color-warning)'}}>{map.mapCode}</span>
-                        <span className="badge badge-warning" style={{fontSize: '9px', padding: '2px 6px'}}>{map.status === 'NEEDS_REVIEW' ? 'ESC' : 'REVIEW'}</span>
+                        <span className="badge badge-warning" style={{fontSize: '9px', padding: '1px 4px'}}>{map.status === 'NEEDS_REVIEW' ? 'ESC' : 'REVIEW'}</span>
                       </div>
-                      <div style={{fontWeight: 700, fontSize: '14px', marginBottom: '6px', color: 'white'}}>{map.title}</div>
-                      <div style={{fontSize: '12px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 0'}}>
-                        <RefreshCw size={12} className="animate-spin" color="var(--color-warning)" />
-                        Running autonomous audit checklist...
+                      <div style={{fontWeight: 700, fontSize: '13.5px', marginBottom: '6px', color: 'var(--text-main)'}}>{map.title}</div>
+                      <div style={{fontSize: '11.5px', color: 'var(--text-light)', display: 'flex', alignItems: 'center', gap: '6px', padding: '4px 0'}}>
+                        <RefreshCw size={11} className="animate-spin" color="var(--color-warning)" />
+                        Running audit checklist...
                       </div>
                     </div>
                   ))}
                   {deptMaps.filter(m => ['EVIDENCE_SUBMITTED', 'VALIDATION_IN_PROGRESS', 'NEEDS_REVIEW'].includes(m.status)).length === 0 && (
                     <div className="kanban-empty-state">
-                      <CheckCircleIcon size={24} />
+                      <CheckCircleIcon size={20} />
                       <div>No tasks pending validation</div>
                     </div>
                   )}
@@ -1007,8 +1007,8 @@ function App() {
               </div>
 
               {/* Column 4: PASSED */}
-              <div className="kanban-column" style={{ background: 'rgba(16, 185, 129, 0.01)', borderColor: 'rgba(16, 185, 129, 0.08)' }}>
-                <div className="column-header" style={{ borderBottomColor: 'rgba(16, 185, 129, 0.1)' }}>
+              <div className="kanban-column" style={{ background: '#ecfdf5', borderColor: '#a7f3d0' }}>
+                <div className="column-header" style={{ borderBottomColor: '#a7f3d0' }}>
                   <span style={{ color: 'var(--color-success)' }}>VALIDATION PASSED</span>
                   <span className="badge badge-success">{deptMaps.filter(m => ['PASSED', 'PARTIALLY_COMPLIANT'].includes(m.status)).length}</span>
                 </div>
@@ -1017,18 +1017,18 @@ function App() {
                     <div key={map.id} className="kanban-card" onClick={() => openDetailModal(map)} style={{borderLeft: '3px solid var(--color-success)'}}>
                       <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '10px'}}>
                         <span style={{fontFamily: 'monospace', fontSize: '11px', fontWeight: 700, color: 'var(--color-success)'}}>{map.mapCode}</span>
-                        <span className="badge badge-success" style={{fontSize: '9px', padding: '2px 6px'}}>CLOSED</span>
+                        <span className="badge badge-success" style={{fontSize: '9px', padding: '1px 4px'}}>CLOSED</span>
                       </div>
-                      <div style={{fontWeight: 700, fontSize: '14px', marginBottom: '6px', color: 'white'}}>{map.title}</div>
-                      <div style={{fontSize: '12px', color: 'var(--color-success)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px'}}>
-                        <UserCheck size={13} />
-                        Compliance validation passed.
+                      <div style={{fontWeight: 700, fontSize: '13.5px', marginBottom: '6px', color: 'var(--text-main)'}}>{map.title}</div>
+                      <div style={{fontSize: '11.5px', color: 'var(--color-success)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px'}}>
+                        <UserCheck size={12} />
+                        Validation passed.
                       </div>
                     </div>
                   ))}
                   {deptMaps.filter(m => ['PASSED', 'PARTIALLY_COMPLIANT'].includes(m.status)).length === 0 && (
                     <div className="kanban-empty-state">
-                      <CheckCircleIcon size={24} />
+                      <CheckCircleIcon size={20} />
                       <div>No closed tasks</div>
                     </div>
                   )}
@@ -1042,23 +1042,23 @@ function App() {
         {/* TAB 5: CIRCULAR INGESTION HUB */}
         {activeTab === 'ingestion' && (
           <div>
-            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px'}}>
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
               <div>
-                <h2 style={{margin: 0, fontSize: '22px', fontWeight: 700, fontFamily: "'Space Grotesk', sans-serif"}}>Circular Ingest Hub</h2>
-                <p style={{color: 'var(--text-muted)', margin: '4px 0 0 0', fontSize: '13px'}}>Manually upload banking circulars or trigger automated website monitoring agents</p>
+                <h2 style={{margin: 0, fontSize: '20px', fontWeight: 700, fontFamily: "'Plus Jakarta Sans', sans-serif"}}>Circular Ingest Hub</h2>
+                <p style={{color: 'var(--text-light)', margin: '4px 0 0 0', fontSize: '12.5px'}}>Manually upload banking circulars or trigger automated website monitoring agents</p>
               </div>
             </div>
 
-            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px'}}>
+            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '28px'}}>
               
               {/* Manual Upload Section */}
-              <div className="glass-panel" style={{padding: '32px'}}>
-                <h3 style={{margin: '0 0 20px 0', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '18px', fontWeight: 700}}>
-                  <Upload size={20} color="var(--primary)" />
+              <div className="glass-panel" style={{padding: '24px'}}>
+                <h3 style={{margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '16px', fontWeight: 700}}>
+                  <Upload size={18} color="var(--primary-accent)" />
                   Manual Document Upload
                 </h3>
                 <form onSubmit={handleUploadDocument}>
-                  <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px'}}>
+                  <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px'}}>
                     <div>
                       <label>Authority Regulator</label>
                       <select value={manualRegulator} onChange={(e) => setManualRegulator(e.target.value)}>
@@ -1080,63 +1080,63 @@ function App() {
 
                   <div className="upload-zone" onClick={() => document.getElementById('manual-upload-input')?.click()}>
                     <input type="file" id="manual-upload-input" style={{display: 'none'}} accept=".pdf" onChange={(e) => setSelectedFile(e.target.files ? e.target.files[0] : null)} />
-                    <Upload size={32} style={{color: 'var(--primary)', marginBottom: '12px'}} />
+                    <Upload size={28} style={{color: 'var(--primary-accent)', marginBottom: '8px'}} />
                     {selectedFile ? (
-                      <div style={{fontWeight: 700, color: 'white'}}>{selectedFile.name}</div>
+                      <div style={{fontWeight: 700, color: 'var(--text-main)'}}>{selectedFile.name}</div>
                     ) : (
                       <div>
-                        <div style={{fontWeight: 700, fontSize: '15px', color: 'white'}}>Click or drag PDF circular file to upload</div>
-                        <p style={{fontSize: '12px', color: 'var(--text-muted)', margin: '6px 0 0 0'}}>Maximum upload size: 15MB PDF</p>
+                        <div style={{fontWeight: 700, fontSize: '13.5px', color: 'var(--text-main)'}}>Click or drag PDF circular file to upload</div>
+                        <p style={{fontSize: '11px', color: 'var(--text-light)', margin: '4px 0 0 0'}}>Maximum upload size: 15MB PDF</p>
                       </div>
                     )}
                   </div>
 
                   {uploadProgress && (
-                    <div style={{marginTop: '16px', padding: '12px', background: 'rgba(59,130,246,0.05)', borderRadius: '8px', border: '1px solid var(--border-glow)', display: 'flex', alignItems: 'center', gap: '8px'}}>
-                      <RefreshCw size={14} className="animate-spin" color="var(--primary)" />
-                      <span style={{fontSize: '13px'}}>{uploadProgress}</span>
+                    <div style={{marginTop: '14px', padding: '10px', background: 'var(--color-info-bg)', borderRadius: '6px', border: '1px solid var(--color-info-border)', display: 'flex', alignItems: 'center', gap: '6px'}}>
+                      <RefreshCw size={12} className="animate-spin" color="var(--primary-accent)" />
+                      <span style={{fontSize: '12px', color: 'var(--color-info)'}}>{uploadProgress}</span>
                     </div>
                   )}
 
-                  <button type="submit" className="btn-primary" style={{width: '100%', marginTop: '24px', justifyContent: 'center'}} disabled={!selectedFile || !!uploadProgress}>
-                    Trigger Extraction & Ingestion
+                  <button type="submit" className="btn-primary" style={{width: '100%', marginTop: '20px', justifyContent: 'center'}} disabled={!selectedFile || !!uploadProgress}>
+                    Trigger Ingestion Pipeline
                   </button>
                 </form>
               </div>
 
               {/* Scraper Section */}
-              <div className="glass-panel" style={{padding: '32px'}}>
-                <h3 style={{margin: '0 0 20px 0', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '18px', fontWeight: 700}}>
-                  <Cpu size={20} color="var(--accent)" />
+              <div className="glass-panel" style={{padding: '24px'}}>
+                <h3 style={{margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '16px', fontWeight: 700}}>
+                  <Cpu size={18} color="var(--primary-accent)" />
                   Automated Scraper Controller
                 </h3>
-                <div style={{padding: '20px', background: 'rgba(255,255,255,0.008)', border: '1px solid var(--border-subtle)', borderRadius: '12px', marginBottom: '24px'}}>
-                  <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '14px'}}>
-                    <span style={{fontWeight: 600, color: 'var(--text-muted)', fontSize: '13px'}}>Scraper Engine Status:</span>
-                    <span className={`badge ${scraperStatus.status === 'RUNNING' ? 'badge-warning' : 'badge-success'}`} style={{padding: '2px 8px', fontSize: '10px'}}>
+                <div style={{padding: '16px', background: '#f8fafc', border: '1px solid var(--border-subtle)', borderRadius: '10px', marginBottom: '20px'}}>
+                  <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '12px'}}>
+                    <span style={{fontWeight: 600, color: 'var(--text-light)', fontSize: '12.5px'}}>Scraper Engine Status:</span>
+                    <span className={`badge ${scraperStatus.status === 'RUNNING' ? 'badge-warning' : 'badge-success'}`} style={{padding: '1px 6px', fontSize: '9.5px'}}>
                       {scraperStatus.status}
                     </span>
                   </div>
-                  <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '14px'}}>
-                    <span style={{fontWeight: 600, color: 'var(--text-muted)', fontSize: '13px'}}>Last Crawl Run:</span>
-                    <span style={{fontSize: '13px', color: '#e5e7eb'}}>{scraperStatus.last_run ? new Date(scraperStatus.last_run).toLocaleString() : 'Never'}</span>
+                  <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '12px'}}>
+                    <span style={{fontWeight: 600, color: 'var(--text-light)', fontSize: '12.5px'}}>Last Crawl Run:</span>
+                    <span style={{fontSize: '12.5px', color: 'var(--text-main)', fontWeight: 500}}>{scraperStatus.last_run ? new Date(scraperStatus.last_run).toLocaleString() : 'Never'}</span>
                   </div>
                   <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                    <span style={{fontWeight: 600, color: 'var(--text-muted)', fontSize: '13px'}}>Documents Discovered:</span>
-                    <span style={{fontWeight: 700, color: 'white'}}>{scraperStatus.last_results_count || 0} documents</span>
+                    <span style={{fontWeight: 600, color: 'var(--text-light)', fontSize: '12.5px'}}>Documents Discovered:</span>
+                    <span style={{fontWeight: 700, color: 'var(--text-main)'}}>{scraperStatus.last_results_count || 0} documents</span>
                   </div>
                 </div>
 
-                <div style={{display: 'flex', gap: '12px'}}>
+                <div style={{display: 'flex', gap: '10px'}}>
                   <button className="btn-primary" style={{flex: 1, justifyContent: 'center'}} onClick={handleTriggerScraper} disabled={scraperStatus.status === 'RUNNING'}>
-                    <RefreshCw size={14} />
+                    <RefreshCw size={12} />
                     Trigger Scraper Crawl
                   </button>
                 </div>
                 
-                <div style={{marginTop: '24px', fontSize: '13px', color: 'var(--text-muted)', borderTop: '1px solid var(--border-subtle)', paddingTop: '20px', display: 'flex', gap: '8px'}}>
-                  <Info size={16} style={{flexShrink: 0, color: 'var(--primary)'}} />
-                  <span>The scraper launches background BeautifulSoup monitoring threads targeting RBI circular registers. Any newly parsed circular will automatically create DB records and trigger LangGraph routing.</span>
+                <div style={{marginTop: '20px', fontSize: '12px', color: 'var(--text-light)', borderTop: '1px solid var(--border-subtle)', paddingTop: '16px', display: 'flex', gap: '6px'}}>
+                  <Info size={14} style={{flexShrink: 0, color: 'var(--primary-accent)', marginTop: '1px'}} />
+                  <span>The scraper launches background Playwright crawling processes to parse RBI compliance registers. Any newly parsed circular triggers real-time LangGraph multi-agent assessments.</span>
                 </div>
               </div>
 
@@ -1149,76 +1149,76 @@ function App() {
       {/* DETAIL MODAL */}
       {isDetailModalOpen && activeMap && (
         <div className="modal-overlay" onClick={() => setIsDetailModalOpen(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{maxWidth: '850px'}}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{maxWidth: '820px'}}>
             <button className="modal-close" onClick={() => setIsDetailModalOpen(false)}>
-              <X size={18} />
+              <X size={16} />
             </button>
             
-            <span className="badge badge-info" style={{marginBottom: '10px', fontSize: '10px'}}>{activeMap.mapCode}</span>
-            <h2 style={{margin: '0 0 14px 0', color: 'white', fontSize: '22px', fontFamily: "'Space Grotesk', sans-serif"}}>{activeMap.title}</h2>
+            <span className="badge badge-info" style={{marginBottom: '8px', fontSize: '9.5px'}}>{activeMap.mapCode}</span>
+            <h2 style={{margin: '0 0 10px 0', color: 'var(--text-main)', fontSize: '20px', fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800}}>{activeMap.title}</h2>
             
             {/* Meta badges grid */}
-            <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '24px'}}>
+            <div style={{display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '20px'}}>
               <span className="badge badge-info">{activeMap.classification}</span>
               <span className="badge badge-warning">{activeMap.priority} Priority</span>
               <span className="badge badge-success">Confidence: {Math.round(activeMap.confidenceScore * 100)}%</span>
-              {activeMap.jiraTicketId && <span className="badge badge-info" style={{background: 'rgba(59,130,246,0.06)', color: '#38bdf8'}}><Code size={12} /> JIRA: {activeMap.jiraTicketId}</span>}
+              {activeMap.jiraTicketId && <span className="badge badge-info" style={{background: 'var(--color-info-bg)', color: 'var(--color-info)', border: '1px solid var(--color-info-border)'}}><Code size={11} /> JIRA: {activeMap.jiraTicketId}</span>}
             </div>
 
             {/* Content Tabs */}
-            <div style={{display: 'flex', flexDirection: 'column', gap: '22px'}}>
+            <div style={{display: 'flex', flexDirection: 'column', gap: '18px'}}>
               
               <div>
-                <h4 style={{margin: '0 0 10px 0', color: '#f3f4f6', fontWeight: 700}}>Compliance Objective Description</h4>
-                <p style={{margin: '0 0 12px 0', lineHeight: 1.5, color: '#d1d5db', fontSize: '14px'}}>{activeMap.description}</p>
-                <div style={{padding: '14px', background: 'rgba(59,130,246,0.03)', border: '1px solid rgba(59,130,246,0.15)', borderRadius: '10px'}}>
-                  <div style={{fontWeight: 700, fontSize: '12px', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px'}}>Mandated Deliverable Proof Checklist</div>
-                  <span style={{fontSize: '13px', color: '#e5e7eb'}}>{activeMap.deliverable}</span>
+                <h4 style={{margin: '0 0 6px 0', color: 'var(--text-main)', fontWeight: 700, fontSize: '13.5px'}}>Compliance Objective Description</h4>
+                <p style={{margin: '0 0 10px 0', lineHeight: 1.5, color: 'var(--text-muted)', fontSize: '13.5px'}}>{activeMap.description}</p>
+                <div style={{padding: '12px', background: 'var(--color-info-bg)', border: '1px solid var(--color-info-border)', borderRadius: '8px'}}>
+                  <div style={{fontWeight: 700, fontSize: '11px', color: 'var(--color-info)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '3px'}}>Mandated Deliverable Proof Checklist</div>
+                  <span style={{fontSize: '12.5px', color: 'var(--text-main)', fontWeight: 500}}>{activeMap.deliverable}</span>
                 </div>
               </div>
 
               {activeMap.reasoningChain && (
                 <div>
-                  <h4 style={{margin: '0 0 10px 0', color: '#f3f4f6', fontWeight: 700}}>Multi-Agent CoT Reasoning Path</h4>
-                  <pre style={{whiteSpace: 'pre-wrap', maxHeight: '200px', overflowY: 'auto'}}>{activeMap.reasoningChain}</pre>
+                  <h4 style={{margin: '0 0 6px 0', color: 'var(--text-main)', fontWeight: 700, fontSize: '13.5px'}}>Multi-Agent CoT Reasoning Path</h4>
+                  <pre style={{whiteSpace: 'pre-wrap', maxHeight: '180px', overflowY: 'auto'}}>{activeMap.reasoningChain}</pre>
                 </div>
               )}
 
               {/* AI Auto-validation verdict result */}
               {activeMap.autoValidationResult && (
-                <div className="glass-panel" style={{padding: '22px', borderLeft: '4px solid ' + (activeMap.autoValidationResult === 'PASSED' ? 'var(--color-success)' : 'var(--color-warning)'), background: 'rgba(15,23,42,0.2)'}}>
-                  <h4 style={{margin: '0 0 12px 0', color: 'white', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px'}}>
-                    <Cpu size={16} color={activeMap.autoValidationResult === 'PASSED' ? 'var(--color-success)' : 'var(--color-warning)'} />
+                <div className="glass-panel" style={{padding: '16px', borderLeft: '4px solid ' + (activeMap.autoValidationResult === 'PASSED' ? '#10b981' : '#f59e0b'), background: '#f8fafc'}}>
+                  <h4 style={{margin: '0 0 8px 0', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', fontWeight: 700}}>
+                    <Cpu size={14} color={activeMap.autoValidationResult === 'PASSED' ? '#10b981' : '#f59e0b'} />
                     AI Autonomous Verification Audit
                   </h4>
-                  <div dangerouslySetInnerHTML={{__html: activeMap.autoValidationReason || ''}} style={{fontSize: '13px', lineHeight: 1.6, color: '#e5e7eb'}} />
+                  <div dangerouslySetInnerHTML={{__html: activeMap.autoValidationReason || ''}} style={{fontSize: '12.5px', lineHeight: 1.5, color: 'var(--text-main)'}} />
                 </div>
               )}
 
               {/* Validation script block for Technical classifications */}
               {activeMap.classification === 'TECHNICAL' && validationScript && (
                 <div>
-                  <h4 style={{margin: '0 0 10px 0', color: '#f3f4f6', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700}}>
-                    <Code size={16} color="var(--primary)" /> Generated Verification script
+                  <h4 style={{margin: '0 0 6px 0', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, fontSize: '13.5px'}}>
+                    <Code size={14} color="var(--primary-accent)" /> Generated Verification Script
                   </h4>
-                  <pre style={{fontSize: '11px', maxHeight: '180px', overflowY: 'auto'}}>{validationScript}</pre>
+                  <pre style={{fontSize: '10.5px', maxHeight: '150px', overflowY: 'auto'}}>{validationScript}</pre>
                 </div>
               )}
 
               {/* Timeline Audits */}
               {mapAuditLogs.length > 0 && (
                 <div>
-                  <h4 style={{margin: '0 0 14px 0', color: '#f3f4f6', fontWeight: 700}}>Immutable Action Audit Trail</h4>
-                  <div className="timeline" style={{paddingLeft: '18px'}}>
+                  <h4 style={{margin: '0 0 10px 0', color: 'var(--text-main)', fontWeight: 700, fontSize: '13.5px'}}>Immutable Action Audit Trail</h4>
+                  <div className="timeline" style={{paddingLeft: '16px'}}>
                     {mapAuditLogs.map(log => (
                       <div key={log.id} className="timeline-item">
-                        <div className="timeline-dot" style={{width: '8px', height: '8px', left: '-23px'}} />
+                        <div className="timeline-dot" style={{width: '6px', height: '6px', left: '-21px', top: '4px'}} />
                         <div className="timeline-header">
-                          <span className="badge badge-success" style={{fontSize: '9px', padding: '2px 6px'}}>{log.eventType}</span>
+                          <span className="badge badge-success" style={{fontSize: '9px', padding: '1px 4px'}}>{log.eventType}</span>
                           <span className="timeline-time">{new Date(log.createdAt).toLocaleString()}</span>
                         </div>
-                        <div style={{fontSize: '13px', margin: '4px 0', color: '#e5e7eb'}}>{log.description}</div>
-                        <div style={{fontSize: '11px', color: 'var(--text-muted)'}}>{log.actor}</div>
+                        <div style={{fontSize: '12.5px', margin: '2px 0', color: 'var(--text-main)'}}>{log.description}</div>
+                        <div style={{fontSize: '10.5px', color: 'var(--text-light)'}}>{log.actor}</div>
                       </div>
                     ))}
                   </div>
@@ -1227,16 +1227,16 @@ function App() {
 
               {/* Human-in-the-loop override panel */}
               {['VALIDATION_IN_PROGRESS', 'EVIDENCE_SUBMITTED', 'NEEDS_REVIEW', 'FAILED'].includes(activeMap.status) ? (
-                <div style={{borderTop: '1px solid var(--border-subtle)', paddingTop: '24px', marginTop: '12px'}}>
-                  <h4 style={{margin: '0 0 14px 0', display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--color-warning)', fontWeight: 700, fontSize: '15px', textTransform: 'uppercase', letterSpacing: '0.5px'}}>
-                    <UserCheck size={18} />
-                    Officer Validation Override Panel
+                <div style={{borderTop: '1px solid var(--border-subtle)', paddingTop: '20px', marginTop: '10px'}}>
+                  <h4 style={{margin: '0 0 10px 0', display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--color-warning)', fontWeight: 700, fontSize: '13.5px', letterSpacing: '0.5px'}}>
+                    <UserCheck size={16} />
+                    OFFICER VALIDATION OVERRIDE PANEL
                   </h4>
                   <form onSubmit={handleOverrideValidation}>
-                    <div style={{display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '16px', marginBottom: '16px'}}>
+                    <div style={{display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '14px', marginBottom: '14px'}}>
                       <div>
                         <label style={{marginTop: 0}}>Override Verdict</label>
-                        <select value={overrideVerdict} onChange={(e) => setOverrideVerdict(e.target.value)} style={{padding: '12px 14px'}}>
+                        <select value={overrideVerdict} onChange={(e) => setOverrideVerdict(e.target.value)} style={{padding: '10px 12px'}}>
                           <option value="PASSED">FORCE PASSED (Compliant)</option>
                           <option value="FAILED">FORCE FAILED (Non-Compliant)</option>
                         </select>
@@ -1246,7 +1246,7 @@ function App() {
                         <input type="text" placeholder="Explain the business/compliance reason for manual override verification..." value={overrideReason} onChange={(e) => setOverrideReason(e.target.value)} required />
                       </div>
                     </div>
-                    <button type="submit" className="btn-primary" style={{width: '100%', background: 'linear-gradient(135deg, var(--color-warning), var(--color-danger))', boxShadow: 'none', justifyContent: 'center'}}>
+                    <button type="submit" className="btn-primary" style={{width: '100%', background: 'linear-gradient(135deg, var(--color-warning), var(--color-danger))', border: 'none', color: '#ffffff', boxShadow: 'none', justifyContent: 'center'}}>
                       Commit Manual Override Verdict
                     </button>
                   </form>
@@ -1261,24 +1261,24 @@ function App() {
       {/* EDIT MODAL */}
       {isEditModalOpen && activeMap && (
         <div className="modal-overlay" onClick={() => setIsEditModalOpen(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{maxWidth: '680px'}}>
             <button className="modal-close" onClick={() => setIsEditModalOpen(false)}>
-              <X size={18} />
+              <X size={16} />
             </button>
-            <h2 style={{margin: '0 0 8px 0', color: 'white', fontFamily: "'Space Grotesk', sans-serif"}}>Edit Compliance Parameters</h2>
-            <p style={{color: 'var(--text-muted)', fontSize: '13px', margin: '0 0 24px 0'}}>Calibrate actionable parameters for MAP {activeMap.mapCode}</p>
+            <h2 style={{margin: '0 0 6px 0', color: 'var(--text-main)', fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800}}>Edit Compliance Parameters</h2>
+            <p style={{color: 'var(--text-light)', fontSize: '12.5px', margin: '0 0 20px 0'}}>Calibrate actionable parameters for MAP {activeMap.mapCode}</p>
 
             <form onSubmit={handleSubmitEdit}>
               <label>Objective Title</label>
               <input type="text" value={editFields.title} onChange={(e) => setEditFields(prev => ({...prev, title: e.target.value}))} required />
               
               <label>Detailed Description</label>
-              <textarea rows={4} value={editFields.description} onChange={(e) => setEditFields(prev => ({...prev, description: e.target.value}))} required />
+              <textarea rows={3} value={editFields.description} onChange={(e) => setEditFields(prev => ({...prev, description: e.target.value}))} required />
               
               <label>Expected Deliverable Requirement</label>
               <input type="text" value={editFields.deliverable} onChange={(e) => setEditFields(prev => ({...prev, deliverable: e.target.value}))} required />
 
-              <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px'}}>
+              <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px'}}>
                 <div>
                   <label>Compliance Deadline</label>
                   <input type="date" value={editFields.deadline} onChange={(e) => setEditFields(prev => ({...prev, deadline: e.target.value}))} required />
@@ -1303,7 +1303,7 @@ function App() {
               <label>Edit Justification Notes</label>
               <input type="text" value={editFields.editReason} onChange={(e) => setEditFields(prev => ({...prev, editReason: e.target.value}))} required />
 
-              <button type="submit" className="btn-primary" style={{width: '100%', marginTop: '24px', justifyContent: 'center'}}>
+              <button type="submit" className="btn-primary" style={{width: '100%', marginTop: '20px', justifyContent: 'center'}}>
                 Approve and Dispatch MAP
               </button>
             </form>
@@ -1314,16 +1314,16 @@ function App() {
       {/* EVIDENCE UPLOAD MODAL */}
       {isEvidenceModalOpen && activeMap && (
         <div className="modal-overlay" onClick={() => setIsEvidenceModalOpen(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{maxWidth: '620px'}}>
             <button className="modal-close" onClick={() => setIsEvidenceModalOpen(false)}>
-              <X size={18} />
+              <X size={16} />
             </button>
-            <h2 style={{margin: '0 0 8px 0', color: 'white', fontFamily: "'Space Grotesk', sans-serif"}}>Submit Compliance Evidence</h2>
-            <p style={{color: 'var(--text-muted)', fontSize: '13px', margin: '0 0 24px 0'}}>Upload proof documents (screenshots, configuration logs, reports) to resolve assigned actions</p>
+            <h2 style={{margin: '0 0 6px 0', color: 'var(--text-main)', fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800}}>Submit Compliance Evidence</h2>
+            <p style={{color: 'var(--text-light)', fontSize: '12.5px', margin: '0 0 20px 0'}}>Upload proof documents (screenshots, configuration logs, reports) to resolve assigned actions</p>
 
-            <div style={{padding: '16px', background: 'rgba(59,130,246,0.04)', border: '1px solid rgba(59,130,246,0.15)', borderRadius: '12px', marginBottom: '24px'}}>
-              <div style={{fontWeight: 700, fontSize: '14px', color: 'white', marginBottom: '6px'}}>{activeMap.title}</div>
-              <div style={{fontSize: '13px', color: '#e5e7eb'}}><span style={{fontWeight: 700, color: 'var(--primary)'}}>EXPECTED PROOFS: </span>{activeMap.evidenceRequired.join(', ')}</div>
+            <div style={{padding: '12px', background: 'var(--color-info-bg)', border: '1px solid var(--color-info-border)', borderRadius: '8px', marginBottom: '20px'}}>
+              <div style={{fontWeight: 700, fontSize: '13.5px', color: 'var(--text-main)', marginBottom: '4px'}}>{activeMap.title}</div>
+              <div style={{fontSize: '12.5px', color: 'var(--text-main)', fontWeight: 500}}><span style={{fontWeight: 700, color: 'var(--primary-accent)'}}>EXPECTED PROOFS: </span>{activeMap.evidenceRequired.join(', ')}</div>
             </div>
 
             <form onSubmit={handleSubmitEvidence}>
@@ -1339,13 +1339,13 @@ function App() {
               <label>Select Evidence Files</label>
               <div className="upload-zone" onClick={() => document.getElementById('evidence-upload-input')?.click()}>
                 <input type="file" id="evidence-upload-input" style={{display: 'none'}} multiple onChange={(e) => setEvidenceFiles(e.target.files)} />
-                <Upload size={32} style={{color: 'var(--primary)', marginBottom: '12px'}} />
+                <Upload size={28} style={{color: 'var(--primary-accent)', marginBottom: '8px'}} />
                 {evidenceFiles && evidenceFiles.length > 0 ? (
-                  <div style={{fontWeight: 700, color: 'white'}}>{evidenceFiles.length} file(s) selected: {Array.from(evidenceFiles).map(f => f.name).join(', ')}</div>
+                  <div style={{fontWeight: 700, color: 'var(--text-main)', fontSize: '13px'}}>{evidenceFiles.length} file(s) selected: {Array.from(evidenceFiles).map(f => f.name).join(', ')}</div>
                 ) : (
                   <div>
-                    <div style={{fontWeight: 700, fontSize: '15px', color: 'white'}}>Select evidence file proofs</div>
-                    <p style={{fontSize: '12px', color: 'var(--text-muted)', margin: '6px 0 0 0'}}>PDF, PNG, JPG, TXT, LOG formats are verified autonomously</p>
+                    <div style={{fontWeight: 700, fontSize: '13.5px', color: 'var(--text-main)'}}>Select evidence file proofs</div>
+                    <p style={{fontSize: '11px', color: 'var(--text-light)', margin: '4px 0 0 0'}}>PDF, PNG, JPG, TXT, LOG formats are verified autonomously</p>
                   </div>
                 )}
               </div>
@@ -1353,7 +1353,7 @@ function App() {
               <label>Compliance Submission Notes</label>
               <textarea rows={3} placeholder="Add officer explanations, build version information, or configuration logs details..." value={evidenceNotes} onChange={(e) => setEvidenceNotes(e.target.value)} required />
 
-              <button type="submit" className="btn-primary" style={{width: '100%', marginTop: '24px', justifyContent: 'center'}}>
+              <button type="submit" className="btn-primary" style={{width: '100%', marginTop: '20px', justifyContent: 'center'}}>
                 Submit Evidence Proofs
               </button>
             </form>
@@ -1367,7 +1367,7 @@ function App() {
 
 // Simple internal icon component helper
 function CheckCircleIcon({ size = 20 }: { size?: number }) {
-  return <CheckSquare size={size} color="var(--text-muted)" style={{ opacity: 0.4 }} />;
+  return <CheckSquare size={size} color="var(--text-light)" style={{ opacity: 0.3 }} />;
 }
 
 export default App;

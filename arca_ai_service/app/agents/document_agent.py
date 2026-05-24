@@ -117,6 +117,128 @@ def run_mock_document_agent(extracted_text: str) -> dict:
             "regulatory_domain": "cybersecurity"
         }
 
+    # Check for AML/Anti-Money Laundering/STR circulars
+    if "aml" in text_lower or "anti-money" in text_lower or "suspicious transaction" in text_lower or "money laundering" in text_lower:
+        print("[Document Agent] AML/CTF circular detected. Loading pre-seeded parsed structure...")
+        return {
+            "document_title": "Master Direction on Anti-Money Laundering (AML) Standards and Suspicious Transaction Reporting",
+            "document_id": "RBI/2026/115",
+            "document_type": "master_direction",
+            "executive_summary": "RBI mandates enhanced due diligence (EDD) for high-risk customers, automated STR filing to FIU-IND within 7 days, and implementation of transaction monitoring systems for detecting layering and structuring patterns in retail and corporate banking channels.",
+            "key_provisions": [
+                {
+                    "section": "Section 3.1",
+                    "heading": "Enhanced Due Diligence for High-Risk Categories",
+                    "full_text": "Banks shall implement enhanced due diligence measures for Politically Exposed Persons (PEPs), non-face-to-face customers, and high-value cash transaction accounts exceeding Rs. 10 lakh.",
+                    "provision_type": "OBLIGATION",
+                    "is_actionable": True
+                },
+                {
+                    "section": "Section 5.2",
+                    "heading": "Automated STR Filing to FIU-IND",
+                    "full_text": "All suspicious transaction reports must be filed electronically to FIU-IND within 7 working days of detection using the prescribed XML format.",
+                    "provision_type": "OBLIGATION",
+                    "is_actionable": True
+                },
+                {
+                    "section": "Section 6.4",
+                    "heading": "Transaction Monitoring System Deployment",
+                    "full_text": "Banks shall deploy automated transaction monitoring systems capable of detecting layering, structuring, and rapid fund movement patterns across CBS and digital channels.",
+                    "provision_type": "OBLIGATION",
+                    "is_actionable": True
+                }
+            ],
+            "deadlines": [
+                {"clause": "Section 5.2", "requirement": "STR electronic filing system operational", "date": "2026-09-30"},
+                {"clause": "Section 6.4", "requirement": "AML transaction monitoring deployment", "date": "2026-11-15"}
+            ],
+            "cross_references": [
+                {"clause": "Section 1", "referenced_document_id": "PMLA/2002/Sec12", "relationship": "implements"}
+            ],
+            "is_amendment": False,
+            "amends_document_id": None,
+            "applicability_keywords": ["AML", "STR", "FIU-IND", "Money Laundering", "PEP", "Due Diligence", "Transaction Monitoring"],
+            "regulatory_domain": "aml"
+        }
+
+    # Check for Digital Lending / NBFC circulars
+    if "digital lending" in text_lower or "lending platform" in text_lower or "nbfc" in text_lower or "loan service" in text_lower:
+        print("[Document Agent] Digital Lending guideline detected. Loading pre-seeded parsed structure...")
+        return {
+            "document_title": "Guidelines on Digital Lending — Fair Practices and Data Governance",
+            "document_id": "RBI/2026/138",
+            "document_type": "guideline",
+            "executive_summary": "RBI strengthens consumer protection in digital lending by mandating transparent loan pricing disclosure, KYC-first disbursement gates, mandatory borrower consent for data access, and restrictions on unauthorized third-party lending service providers (LSPs).",
+            "key_provisions": [
+                {
+                    "section": "Section 2.3",
+                    "heading": "Mandatory Loan Pricing Disclosure at Onboarding",
+                    "full_text": "All lending platforms shall display the Annual Percentage Rate (APR), processing fees, and penal charges on a standardized Key Fact Statement (KFS) before loan agreement execution.",
+                    "provision_type": "OBLIGATION",
+                    "is_actionable": True
+                },
+                {
+                    "section": "Section 4.1",
+                    "heading": "Borrower Data Access Consent Gate",
+                    "full_text": "No Lending Service Provider shall access borrower device data (contacts, photos, storage) without explicit, granular, and revocable consent.",
+                    "provision_type": "OBLIGATION",
+                    "is_actionable": True
+                }
+            ],
+            "deadlines": [
+                {"clause": "Section 2.3", "requirement": "KFS implementation on all digital platforms", "date": "2026-10-01"}
+            ],
+            "cross_references": [],
+            "is_amendment": False,
+            "amends_document_id": None,
+            "applicability_keywords": ["Digital Lending", "NBFC", "LSP", "KFS", "APR", "Borrower Consent"],
+            "regulatory_domain": "lending"
+        }
+
+    # Check for CERT-In / Cybersecurity Incident circulars
+    if "cert-in" in text_lower or "cyber incident" in text_lower or "cyber security" in text_lower or "cybersecurity incident" in text_lower or "6 hour" in text_lower:
+        print("[Document Agent] CERT-In Cybersecurity Incident Reporting circular detected. Loading pre-seeded parsed structure...")
+        return {
+            "document_title": "Directions for Mandatory Cybersecurity Incident Reporting under CERT-In Guidelines",
+            "document_id": "CERT-In/2026/DIR-01",
+            "document_type": "direction",
+            "executive_summary": "CERT-In mandates all financial sector entities to report cybersecurity incidents within 6 hours of detection, implement network segmentation for critical banking infrastructure, maintain 180-day rolling logs of all ICT systems, and appoint a dedicated Cybersecurity Incident Response Officer (CIRO).",
+            "key_provisions": [
+                {
+                    "section": "Section 2.1",
+                    "heading": "6-Hour Incident Reporting Mandate",
+                    "full_text": "Banks must report all cybersecurity incidents including data breaches, ransomware, unauthorized access, and DDoS attacks to CERT-In within 6 hours of detection through the designated portal.",
+                    "provision_type": "OBLIGATION",
+                    "is_actionable": True
+                },
+                {
+                    "section": "Section 3.3",
+                    "heading": "180-Day ICT Log Retention",
+                    "full_text": "All ICT system logs including firewall, VPN, proxy, mail server, and database access logs shall be maintained for a rolling 180-day period and made available to CERT-In upon request.",
+                    "provision_type": "OBLIGATION",
+                    "is_actionable": True
+                },
+                {
+                    "section": "Section 4.1",
+                    "heading": "Network Segmentation for Critical Infrastructure",
+                    "full_text": "Critical banking infrastructure (CBS, SWIFT, payment gateways) must be segmented from general corporate networks using hardware firewalls and VLAN isolation.",
+                    "provision_type": "OBLIGATION",
+                    "is_actionable": True
+                }
+            ],
+            "deadlines": [
+                {"clause": "Section 2.1", "requirement": "Incident reporting portal integration", "date": "2026-07-15"},
+                {"clause": "Section 3.3", "requirement": "180-day log retention system", "date": "2026-09-01"}
+            ],
+            "cross_references": [
+                {"clause": "Section 1", "referenced_document_id": "IT-Act-2000/Sec-70B", "relationship": "implements"}
+            ],
+            "is_amendment": False,
+            "amends_document_id": None,
+            "applicability_keywords": ["CERT-In", "Cybersecurity", "Incident Response", "6-Hour Reporting", "Log Retention", "Network Segmentation"],
+            "regulatory_domain": "cybersecurity"
+        }
+
     # Catch-all general circular response
     import hashlib
     content_hash_short = hashlib.md5(extracted_text.encode('utf-8')).hexdigest()[:6]

@@ -13,6 +13,11 @@ services:
       - "5543:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U arca_user -d arca"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:7-alpine
@@ -22,7 +27,71 @@ services:
       - "6380:6379"
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ../arca_backend
+      dockerfile: ../docker/backend.Dockerfile
+    container_name: arca_backend
+    restart: always
+    ports:
+      - "3001:3001"
+    environment:
+      DATABASE_URL: postgresql://arca_user:arca_pass@postgres:5432/arca
+      PORT: 3001
+      NODE_ENV: development
+      AI_SERVICE_URL: http://ai:8000
+      FRONTEND_URL: http://localhost:5173
+      JIRA_BASE_URL: https://mock-jira.atlassian.net
+      JIRA_API_TOKEN: mock_jira_token_for_hackathon
+      SMTP_HOST: smtp.mailtrap.io
+      SMTP_PORT: 2525
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - backend_uploads:/app/uploads
+
+  ai:
+    build:
+      context: ../arca_ai_service
+      dockerfile: ../docker/ai.Dockerfile
+    container_name: arca_ai_service
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      BACKEND_URL: http://backend:3001
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-your_openai_api_key_here}
+      GROQ_API_KEY: ${GROQ_API_KEY:-your_groq_api_key_here}
+      CHROMA_PERSIST_DIR: /app/data/chroma_db
+    depends_on:
+      - backend
+    volumes:
+      - ai_data:/app/data
+
+  frontend:
+    build:
+      context: ../arca_frontend
+      dockerfile: ../docker/frontend.Dockerfile
+    container_name: arca_frontend
+    restart: always
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_BACKEND_URL: http://localhost:3001
+      VITE_AI_URL: http://localhost:8000
+    depends_on:
+      - backend
+      - ai
 
 volumes:
   postgres_data:
   redis_data:
+  backend_uploads:
+  ai_data:

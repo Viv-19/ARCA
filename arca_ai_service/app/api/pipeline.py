@@ -26,6 +26,9 @@ async def run_pipeline(payload: PipelineRunRequest):
             "analysis": None,
             "inventory_result": None,
             "generated_maps": None,
+            "routing_results": None,
+            "risk_assessment": None,
+            "scripts_generated": None,
             "errors": []
         }
         
@@ -41,6 +44,9 @@ async def run_pipeline(payload: PipelineRunRequest):
             "document_id": payload.document_id,
             "inventory_result": result_state.get("inventory_result"),
             "maps_count": len(result_state.get("generated_maps") or []),
+            "routing_results": result_state.get("routing_results"),
+            "risk_assessment": result_state.get("risk_assessment"),
+            "scripts_generated": result_state.get("scripts_generated"),
             "errors": result_state.get("errors", [])
         }
     except Exception as e:

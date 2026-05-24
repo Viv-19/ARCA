@@ -1,4 +1,5 @@
 import json
+import re
 import httpx
 from typing import List, Optional
 from app.core.config import settings
@@ -143,7 +144,6 @@ async def evaluate_system_risk() -> dict:
         """
         
         response = await llm.ainvoke(prompt)
-        import re
         parsed_res = json.loads(re.sub(r'```json|```', '', response.content).strip())
         return parsed_res
         
