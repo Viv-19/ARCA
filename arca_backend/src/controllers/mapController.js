@@ -128,8 +128,34 @@ const createMap = async (req, res, next) => {
       const doc = await prisma.document.findUnique({ where: { id: mapData.documentId } });
       const regulator = doc ? doc.regulator : 'REG';
       const year = doc && doc.publicationDate ? new Date(doc.publicationDate).getFullYear() : new Date().getFullYear();
-      const count = await prisma.map.count({ where: { documentId: mapData.documentId } });
-      mapData.mapCode = `MAP-${regulator}-${year}-${String(count + 1).padStart(3, '0')}`;
+      
+      // Count all maps for this regulator and year across all documents
+      const startDate = new Date(`${year}-01-01T00:00:00.000Z`);
+      const endDate = new Date(`${year}-12-31T23:59:59.999Z`);
+      const count = await prisma.map.count({
+        where: {
+          document: {
+            regulator: regulator,
+            publicationDate: {
+              gte: startDate,
+              lte: endDate
+            }
+          }
+        }
+      });
+      
+      let finalCount = count;
+      let code = `MAP-${regulator}-${year}-${String(finalCount + 1).padStart(3, '0')}`;
+      
+      // Safety loop to resolve concurrent inserts or edge cases
+      let exists = await prisma.map.findUnique({ where: { mapCode: code } });
+      while (exists) {
+        finalCount++;
+        code = `MAP-${regulator}-${year}-${String(finalCount + 1).padStart(3, '0')}`;
+        exists = await prisma.map.findUnique({ where: { mapCode: code } });
+      }
+      
+      mapData.mapCode = code;
     }
 
     const map = await prisma.map.create({

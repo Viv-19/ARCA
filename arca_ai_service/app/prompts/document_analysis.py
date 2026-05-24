@@ -18,39 +18,39 @@ Today's Local Date: {today_date}
 Publication Date: {publication_date}
 
 JSON Schema Output Format:
-{
+{{
   "document_title": "...",
   "document_id": "Circular ID (e.g. RBI/2026/102)",
   "document_type": "circular / notification / master_direction / guideline",
   "executive_summary": "Plain English overview summarizing core changes in under 150 words.",
   "key_provisions": [
-    {
+    {{
       "section": "Clause number (e.g., Section 4.2)",
       "heading": "Clause header",
       "full_text": "Exact copied sentence from source.",
       "provision_type": "OBLIGATION / GUIDANCE / DEFINITION / PENALTY",
       "is_actionable": true
-    }
+    }}
   ],
   "deadlines": [
-    {
+    {{
       "clause": "e.g. Section 5",
       "requirement": "Multi-factor authentication must be enabled",
       "date": "YYYY-MM-DD"
-    }
+    }}
   ],
   "cross_references": [
-    {
+    {{
       "clause": "e.g. Section 2.1",
       "referenced_document_id": "RBI/2016/47",
       "relationship": "supersedes / modifies / references"
-    }
+    }}
   ],
   "is_amendment": true,
   "amends_document_id": "RBI/2016/47",
   "applicability_keywords": ["KYC", "Aadhaar", "Biometrics"],
   "regulatory_domain": "kyc"
-}
+}}
 
 Respond strictly with valid JSON. No explanations, no backticks formatting, just parsed JSON structure.
 """

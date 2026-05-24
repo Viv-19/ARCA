@@ -311,7 +311,9 @@ async def run_document_agent(extracted_text: str, publication_date: str = None) 
             ], response_format={"type": "json_object"})
             
             raw_content = response.content.strip()
-            raw_content = re.sub(r'^```json\s*|\s*```$', '', raw_content, flags=re.MULTILINE).strip()
+            json_match = re.search(r'(\{.*\})', raw_content, re.DOTALL)
+            if json_match:
+                raw_content = json_match.group(1)
             parsed = json.loads(raw_content)
             return parsed
     except Exception as e:
