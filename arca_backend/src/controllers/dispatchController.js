@@ -1,5 +1,4 @@
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+const prisma = require('../config/prisma');
 const axios = require('axios');
 const { createComplianceTicket } = require('../services/jiraService');
 const { sendMapAssignmentEmail } = require('../services/emailService');

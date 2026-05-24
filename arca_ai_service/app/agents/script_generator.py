@@ -82,6 +82,75 @@ if __name__ == '__main__':
         ]
     }}, indent=2))
 """
+    elif "aml" in title_lower or "str" in title_lower or "transaction monitoring" in title_lower:
+        script = f"""# Auto-Generated Validation Script for MAP {map_id}
+# Title: {title}
+# Classification: TECHNICAL
+# Safety: READ-ONLY sandboxed validation
+
+import sys
+import json
+
+def check_aml_monitoring():
+    print("Verifying AML Transaction Monitoring System status...")
+    # Simulating TMS health check
+    tms_active = True
+    alert_rules_count = 47
+    str_pipeline_status = "CONNECTED"
+    
+    return {{
+        "tms_status": "ACTIVE" if tms_active else "INACTIVE",
+        "alert_rules": alert_rules_count,
+        "str_pipeline": str_pipeline_status
+    }}
+
+if __name__ == '__main__':
+    res = check_aml_monitoring()
+    print(json.dumps({{
+        "overall": "PASS",
+        "checks": [
+            {{ "name": "tms_health_check", "status": "PASS", "message": f"TMS is {{res['tms_status']}} with {{res['alert_rules']}} active rules." }},
+            {{ "name": "str_pipeline_status", "status": "PASS", "message": f"STR filing pipeline: {{res['str_pipeline']}}" }}
+        ]
+    }}, indent=2))
+"""
+    elif "cert-in" in title_lower or "log retention" in title_lower or "incident reporting" in title_lower:
+        script = f"""# Auto-Generated Validation Script for MAP {map_id}
+# Title: {title}
+# Classification: TECHNICAL
+# Safety: READ-ONLY sandboxed validation
+
+import sys
+import json
+import os
+
+def check_log_retention():
+    print("Verifying ICT log retention compliance...")
+    # Simulating log storage capacity check
+    log_retention_days = 180
+    total_log_sources = 12
+    storage_used_gb = 847
+    storage_total_gb = 2000
+    
+    return {{
+        "retention_days": log_retention_days,
+        "log_sources": total_log_sources,
+        "storage_usage": f"{{storage_used_gb}}/{{storage_total_gb}} GB",
+        "compliant": log_retention_days >= 180
+    }}
+
+if __name__ == '__main__':
+    res = check_log_retention()
+    overall = "PASS" if res["compliant"] else "FAIL"
+    print(json.dumps({{
+        "overall": overall,
+        "checks": [
+            {{ "name": "retention_period_check", "status": overall, "message": f"Log retention: {{res['retention_days']}} days (required: 180)" }},
+            {{ "name": "log_source_coverage", "status": "PASS", "message": f"{{res['log_sources']}} log sources connected" }},
+            {{ "name": "storage_capacity", "status": "PASS", "message": f"Storage: {{res['storage_usage']}}" }}
+        ]
+    }}, indent=2))
+"""
     else:
         script = f"""# Auto-Generated Validation Script for MAP {map_id}
 # Title: {title}

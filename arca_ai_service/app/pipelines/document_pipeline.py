@@ -14,6 +14,9 @@ class PipelineState(TypedDict):
     analysis: Optional[dict]
     inventory_result: Optional[str]   # NEW, AMENDMENT, DUPLICATE
     generated_maps: Optional[List[dict]]
+    routing_results: Optional[List[dict]]
+    risk_assessment: Optional[dict]
+    scripts_generated: Optional[int]
     errors: List[str]
 
 # Node 1: Analyze Document
@@ -148,20 +151,108 @@ def conditional_route_after_inventory(state: PipelineState) -> str:
     print(f"[Pipeline Routing] Class: {res}. Transitioning to map generator nodes...")
     return "PROCEED"
 
+# Node 5: Route All Generated MAPs to Banking Departments
+async def node_route_all_maps(state: PipelineState) -> dict:
+    from app.agents.routing_agent import route_map
+    maps = state.get("generated_maps", [])
+    errors = state.get("errors", [])
+    routing_results = []
+    
+    print(f"[Pipeline] Node [route_maps]: Running AI department routing for {len(maps)} MAPs...")
+    for map_obj in maps:
+        try:
+            result = await route_map(
+                map_obj.get("title", "")[:20],
+                map_obj.get("title", ""),
+                map_obj.get("description", ""),
+                map_obj.get("regulatory_keywords", [])
+            )
+            routing_results.append({
+                "map_title": map_obj.get("title"),
+                "department": result.get("department"),
+                "confidence": result.get("confidence"),
+                "justification": result.get("justification")
+            })
+            print(f"[Pipeline] Routed '{map_obj.get('title', '')[:30]}...' → {result.get('department')} ({result.get('confidence', 0):.0%})")
+        except Exception as e:
+            err_msg = f"Routing failed for MAP '{map_obj.get('title', '')[:30]}': {e}"
+            print(f"[Pipeline Error] {err_msg}")
+            errors.append(err_msg)
+    
+    return {
+        "routing_results": routing_results,
+        "errors": errors
+    }
+
+# Node 6: Assess System-Wide Risk and Detect Conflicts
+async def node_assess_risk(state: PipelineState) -> dict:
+    from app.agents.risk_agent import evaluate_system_risk
+    errors = state.get("errors", [])
+    
+    print(f"[Pipeline] Node [assess_risk]: Running cross-MAP conflict analysis and systemic risk scoring...")
+    try:
+        risk_data = await evaluate_system_risk()
+        print(f"[Pipeline] Risk Assessment Complete — Score: {risk_data.get('system_risk_score')}, Level: {risk_data.get('risk_level')}, Conflicts: {len(risk_data.get('conflicts', []))}")
+        return {
+            "risk_assessment": risk_data,
+            "errors": errors
+        }
+    except Exception as e:
+        err_msg = f"Risk assessment failed: {e}"
+        print(f"[Pipeline Error] {err_msg}")
+        return {
+            "risk_assessment": None,
+            "errors": errors + [err_msg]
+        }
+
+# Node 7: Generate Validation Scripts for Technical MAPs
+async def node_generate_scripts(state: PipelineState) -> dict:
+    from app.agents.script_generator import generate_validation_script
+    maps = state.get("generated_maps", [])
+    errors = state.get("errors", [])
+    scripts_generated = 0
+    
+    print(f"[Pipeline] Node [generate_scripts]: Creating validation scripts for TECHNICAL MAPs...")
+    for map_obj in maps:
+        if map_obj.get("classification") == "TECHNICAL":
+            try:
+                script = await generate_validation_script(
+                    map_obj.get("title", "")[:20],
+                    map_obj.get("title", ""),
+                    map_obj.get("description", ""),
+                    map_obj.get("deliverable", "")
+                )
+                scripts_generated += 1
+                print(f"[Pipeline] Generated validation script for: '{map_obj.get('title', '')[:30]}...' ({len(script)} chars)")
+            except Exception as e:
+                err_msg = f"Script generation failed for '{map_obj.get('title', '')[:30]}': {e}"
+                print(f"[Pipeline Error] {err_msg}")
+                errors.append(err_msg)
+    
+    print(f"[Pipeline] Script generation complete. {scripts_generated} script(s) generated.")
+    return {
+        "scripts_generated": scripts_generated,
+        "errors": errors
+    }
+
 def build_pipeline():
     """
-    Assembles, compiles, and registers the multi-agent stateful graph.
+    Assembles, compiles, and registers the full 7-agent stateful graph.
+    Pipeline: analyze → inventory → generate_maps → save_maps → route → risk → scripts → END
     """
-    print("[LangGraph Engine] Initializing stateful multi-agent LangGraph workflow pipeline...")
+    print("[LangGraph Engine] Initializing stateful 7-agent LangGraph workflow pipeline...")
     builder = StateGraph(PipelineState)
     
-    # Register Nodes
+    # Register ALL 7 Agent Nodes
     builder.add_node("analyze", node_analyze_document)
     builder.add_node("check_inventory", node_check_inventory)
     builder.add_node("generate_maps", node_generate_maps)
     builder.add_node("save_maps", node_save_maps_to_backend)
+    builder.add_node("route_maps", node_route_all_maps)
+    builder.add_node("assess_risk", node_assess_risk)
+    builder.add_node("generate_scripts", node_generate_scripts)
     
-    # Configure Directed Graph Edges
+    # Configure Directed Graph Edges (Full 7-Agent Flow)
     builder.set_entry_point("analyze")
     builder.add_edge("analyze", "check_inventory")
     
@@ -175,7 +266,10 @@ def build_pipeline():
     )
     
     builder.add_edge("generate_maps", "save_maps")
-    builder.add_edge("save_maps", END)
+    builder.add_edge("save_maps", "route_maps")
+    builder.add_edge("route_maps", "assess_risk")
+    builder.add_edge("assess_risk", "generate_scripts")
+    builder.add_edge("generate_scripts", END)
     
-    print("[LangGraph Engine] Stateful multi-agent graph compiled successfully.")
+    print("[LangGraph Engine] Full 7-agent stateful graph compiled successfully.")
     return builder.compile()

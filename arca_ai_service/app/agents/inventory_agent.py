@@ -45,7 +45,7 @@ async def check_inventory(document_analysis: dict) -> dict:
             async with httpx.AsyncClient(timeout=5.0) as client:
                 response = await client.get(f"{settings.BACKEND_URL}/api/maps", params={"regulator": "RBI"})
                 if response.status_code == 200:
-                    all_maps = response.data.get('maps', []) if hasattr(response, 'data') else response.json().get('maps', [])
+                    all_maps = response.json().get('maps', [])
                     # Filter maps related to the amended document
                     affected_maps = [m for m in all_maps if amends_id in str(m.get('mapCode', '')) or amends_id in str(m.get('description', ''))]
                     print(f"[Inventory Agent] Discovered {len(affected_maps)} existing compliance MAPs impacted by this amendment.")

@@ -1,5 +1,4 @@
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+const prisma = require('../config/prisma');
 
 // GET /api/audit-log — list all audit trail logs
 const getAuditLogs = async (req, res, next) => {

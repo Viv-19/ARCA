@@ -1,5 +1,4 @@
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+const prisma = require('../config/prisma');
 
 const PRIORITY_WEIGHTS = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
 const REGULATOR_WEIGHTS = { RBI: 1.5, 'CERT-In': 1.3, SEBI: 1.2, OTHER: 1.0 };
