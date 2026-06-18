@@ -40,63 +40,12 @@ def seed_department_embeddings_if_empty():
     except Exception as e:
         print(f"[ChromaDB Seeding Warning] Department seed omitted: {e}")
 
-def local_semantic_fallback_router(title: str, description: str, keywords: List[str]) -> dict:
-    """
-    Deterministic fallback routing algorithm using local word-hashing.
-    Calculates overlap scores per department and yields highly explainable decisions.
-    """
-    print("[Routing Agent] Sandbox Mode: Running local text overlap score routing...")
-    combined_query = f"{title} {description} {' '.join(keywords)}".lower()
-    
-    best_dept = "Compliance Central"
-    best_score = -1.0
-    
-    # Calculate word frequency overlaps per department
-    for dept_name, profile_text in DEPARTMENT_PROFILES.items():
-        overlap_score = 0.0
-        # Parse clean alphanumeric words
-        words = re.findall(r'[a-z0-9]+', profile_text.lower())
-        for word in words:
-            if word in combined_query:
-                # Give higher weights to unique technical keywords
-                weight = 2.0 if word in ["mfa", "fido2", "swift", "forex", "kyc", "biometric"] else 1.0
-                overlap_score += weight
-                
-        if overlap_score > best_score:
-            best_score = overlap_score
-            best_dept = dept_name
-            
-    print(f"[Routing Agent] Local routing complete. Selected: \"{best_dept}\" with raw match score: {best_score}")
-    
-    # Formulate highly realistic human justification
-    justification = f"Automated semantic dispatch assigned this compliance item to {best_dept} based on high-frequency matching of core operational parameters "
-    if best_dept == "IT Security":
-        justification += "demanding systems configuration updates, multi-factor credential validations, or hardware token integrations."
-    elif best_dept == "Digital Banking IT":
-        justification += "targeting mobile banking interfaces, net banking portals, and UPI payment channels."
-    elif best_dept == "Legal":
-        justification += "requiring legal opinion drafts, court notices updates, or regulatory fine evaluations."
-    elif best_dept == "HR and Training":
-        justification += "mandating employee security awareness, certification tracking, or branch staff learning programs."
-    else:
-        justification += "related to standard operations and compliance governance triages."
-        
-    return {
-        "department": best_dept,
-        "confidence": 0.85 if best_score > 0 else 0.5,
-        "justification": justification
-    }
-
 async def route_map(map_id: str, title: str, description: str, keywords: List[str]) -> dict:
     """
     Smart semantic routing handler that assigns a MAP to a banking department.
     """
     # Seed department embeddings
     seed_department_embeddings_if_empty()
-    
-    is_dummy_key = settings.OPENAI_API_KEY == "your_openai_api_key_here" or not settings.OPENAI_API_KEY or settings.OPENAI_API_KEY.startswith("gsk_")
-    if is_dummy_key:
-        return local_semantic_fallback_router(title, description, keywords)
         
     try:
         from langchain_openai import ChatOpenAI
@@ -161,5 +110,9 @@ async def route_map(map_id: str, title: str, description: str, keywords: List[st
         print(f"[Routing Agent Success] LLM assigned: \"{parsed_res['department']}\".")
         return parsed_res
     except Exception as e:
-        print(f"[Routing Agent Error] Smart routing failed: {e}. Activating local term fallback...")
-        return local_semantic_fallback_router(title, description, keywords)
+        print(f"[Routing Agent Error] Smart routing failed: {e}. Returning safe fallback assignment.")
+        return {
+            "department": "Compliance Central",
+            "confidence": 0.5,
+            "justification": f"Automatic semantic routing encountered an error ({str(e)}). Task routed to Compliance Central for manual reassignment."
+        }

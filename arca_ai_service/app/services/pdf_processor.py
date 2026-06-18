@@ -46,7 +46,14 @@ def extract_text_with_ocr(file_path: str) -> str:
         from pdf2image import convert_from_path
         import pytesseract
         
+        # Windows Tesseract Path fallback
+        tesseract_path = os.getenv('TESSERACT_CMD', r'C:\Program Files\Tesseract-OCR\tesseract.exe')
+        if os.name == 'nt' and os.path.exists(tesseract_path):
+            pytesseract.pytesseract.tesseract_cmd = tesseract_path
+
         print(f"[OCR Pipeline] Rendering PDF pages to images...")
+        # Note: on Windows, pdf2image requires poppler in PATH. 
+        # If it fails, it throws an exception.
         images = convert_from_path(file_path)
         text = ""
         

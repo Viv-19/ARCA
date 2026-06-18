@@ -53,3 +53,32 @@ async def process_document(
     except Exception as e:
         print(f"[Documents API Error] Failed to process uploaded document: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+from typing import Optional
+
+@router.delete("/{document_id}")
+async def delete_document_memory(document_id: str, filename: Optional[str] = None):
+    try:
+        print(f"[Documents API] Deleting document memory for ID: {document_id}")
+        # 1. Delete ChromaDB embeddings
+        from app.vectorstore.chroma_client import get_regulations_collection
+        try:
+            collection = get_regulations_collection()
+            collection.delete(ids=[document_id])
+            print(f"[Documents API] Deleted embeddings from regulations_db for ID: {document_id}")
+        except Exception as ve:
+            print(f"[Documents API Warning] Failed to delete embeddings from regulations_db: {ve}")
+            
+        # 2. Delete raw PDF from raw directory if filename is provided
+        if filename:
+            # Clean path traversal attempts
+            safe_filename = os.path.basename(filename)
+            raw_path = os.path.join(RAW_DIR, safe_filename)
+            if os.path.exists(raw_path):
+                os.remove(raw_path)
+                print(f"[Documents API] Deleted raw file from: {raw_path}")
+                
+        return {"success": True, "message": "Document memory cleared successfully"}
+    except Exception as e:
+        print(f"[Documents API Error] Failed to delete document memory: {e}")
+        raise HTTPException(status_code=500, detail=str(e))

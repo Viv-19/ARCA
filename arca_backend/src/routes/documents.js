@@ -9,7 +9,10 @@ const {
   createDocument,
   getDocumentById,
   updateDocumentStatus,
-  uploadDocument
+  uploadDocument,
+  triggerPipeline,
+  downloadDocumentFile,
+  deleteDocument
 } = require('../controllers/documentController');
 
 // Ensure uploads/temp directory exists
@@ -46,5 +49,8 @@ router.post('/', createDocument);
 router.get('/:id', getDocumentById);
 router.put('/:id/status', updateDocumentStatus);
 router.post('/upload', upload.single('file'), uploadDocument);
+router.post('/:id/trigger-pipeline', triggerPipeline);
+router.get('/:id/file', downloadDocumentFile);
+router.delete('/:id', deleteDocument);
 
 module.exports = router;

@@ -51,6 +51,7 @@ const departmentRoutes = require('./routes/departments');
 const alertRoutes = require('./routes/alerts');
 const auditLogRoutes = require('./routes/auditLogs');
 const riskRoutes = require('./routes/risk');
+const pipelineRoutes = require('./routes/pipeline');
 
 // Register API Routes
 app.use('/api/documents', documentRoutes);
@@ -59,6 +60,7 @@ app.use('/api/departments', departmentRoutes);
 app.use('/api/alerts', alertRoutes);
 app.use('/api/audit-log', auditLogRoutes);
 app.use('/api/risk', riskRoutes);
+app.use('/api/pipeline', pipelineRoutes);
 
 // Global Error Handler — Centralized with structured responses
 app.use((err, req, res, next) => {

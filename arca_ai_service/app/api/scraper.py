@@ -14,17 +14,23 @@ scraper_status = {
     "status": "IDLE",
     "last_run": None,
     "last_results_count": 0,
-    "errors": []
+    "errors": [],
+    "logs": []
 }
 
 async def run_scraper_task():
     global scraper_status
     scraper_status["status"] = "RUNNING"
     scraper_status["errors"] = []
+    scraper_status["logs"] = []
     
+    def append_log(msg: str):
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        scraper_status["logs"].append(f"[{timestamp}] {msg}")
+
+    append_log("[Scraper Task] Running RBI scraper background job...")
     try:
-        print("[Scraper Task] Running RBI scraper background job...")
-        circulars = await scrape_rbi_circulars(limit=2)
+        circulars = await scrape_rbi_circulars(limit=2, log_callback=append_log)
         scraper_status["last_results_count"] = len(circulars)
         
         async with httpx.AsyncClient(timeout=60.0) as client:
@@ -36,6 +42,9 @@ async def run_scraper_task():
                 if os.path.exists(local_path):
                     text = extract_text_from_pdf(local_path)
                     file_hash = compute_file_hash(local_path)
+                else:
+                    append_log(f"[Scraper Task] PDF file not found at {local_path}. Skipping.")
+                    continue
                     
                 # 2. Build backend document creation payload
                 payload = {
@@ -54,28 +63,22 @@ async def run_scraper_task():
                 }
                 
                 # 3. Write document to database
-                print(f"[Scraper Task] Posting scraped document \"{circ['title'][:30]}\" to backend...")
+                append_log(f"[Scraper Task] Posting scraped document \"{circ['title'][:30]}\" to backend...")
                 res = await client.post(f"{settings.BACKEND_URL}/api/documents", json=payload)
                 
                 if res.status_code == 201:
                     doc = res.json()
-                    # Trigger pipeline run automatically for this document!
-                    print(f"[Scraper Task] Triggering pipeline run for document ID: {doc['id']}...")
-                    pipeline_res = await client.post(f"{settings.BACKEND_URL}/api/pipeline/run", json={
-                        "document_id": doc["id"],
-                        "extracted_text": doc["extractedText"],
-                        "publication_date": doc["publicationDate"]
-                    })
-                    print(f"[Scraper Task] Pipeline response: {pipeline_res.status_code}")
+                    append_log(f"[Scraper Task] Document \"{doc['title'][:30]}\" successfully stored in database. Awaiting manual pipeline trigger.")
                 elif res.status_code == 409:
-                    print(f"[Scraper Task] Document \"{circ['title'][:30]}\" is already ingested (duplicate hash). Skipping.")
+                    append_log(f"[Scraper Task] Document \"{circ['title'][:30]}\" already exists in database (duplicate hash).")
                 else:
-                    print(f"[Scraper Task Warning] Backend returned code {res.status_code}: {res.text}")
+                    append_log(f"[Scraper Task Warning] Backend returned code {res.status_code}: {res.text}")
                     
         scraper_status["status"] = "COMPLETED"
         scraper_status["last_run"] = datetime.datetime.now().isoformat()
+        append_log("[Scraper Task] Crawling finished successfully.")
     except Exception as e:
-        print(f"[Scraper Task Error] Background job failed: {e}")
+        append_log(f"[Scraper Task Error] Background job failed: {e}")
         scraper_status["status"] = "FAILED"
         scraper_status["errors"].append(str(e))
 

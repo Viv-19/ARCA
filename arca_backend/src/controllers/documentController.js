@@ -227,16 +227,6 @@ const uploadDocument = async (req, res, next) => {
     // Emit event to dashboard
     req.io.to('compliance-dashboard').emit('document:new', doc);
 
-    // Trigger AI pipeline automatically to generate MAPs
-    console.log(`[Manual Upload] Triggering MAP Generation pipeline for Document: ${doc.id}...`);
-    axios.post(`${process.env.AI_SERVICE_URL}/api/pipeline/run`, {
-      document_id: doc.id,
-      extracted_text: doc.extractedText,
-      publication_date: doc.publicationDate
-    }).catch(err => {
-      console.error("[Manual Ingestion] Failed to auto-trigger LangGraph pipeline:", err.message);
-    });
-
     res.status(201).json(doc);
   } catch (error) {
     console.error("[Manual Upload Error]", error);
@@ -248,10 +238,187 @@ const uploadDocument = async (req, res, next) => {
   }
 };
 
+// POST /api/documents/:id/trigger-pipeline — manually run pipeline on document
+const triggerPipeline = async (req, res, next) => {
+  try {
+    const doc = await prisma.document.findUnique({
+      where: { id: req.params.id }
+    });
+    if (!doc) {
+      return res.status(404).json({ error: "Document not found" });
+    }
+
+    // Update status to PROCESSING
+    const updatedDoc = await prisma.document.update({
+      where: { id: doc.id },
+      data: { status: "PROCESSING" }
+    });
+
+    // Emit Socket event to update UI immediately
+    req.io.to('compliance-dashboard').emit('document:status', updatedDoc);
+
+    console.log(`[Manual Trigger] Dispatching document "${doc.title}" to AI pipeline...`);
+
+    // Trigger AI pipeline in the background so HTTP response is fast
+    axios.post(`${process.env.AI_SERVICE_URL || 'http://localhost:8000'}/api/pipeline/run`, {
+      document_id: doc.id,
+      extracted_text: doc.extractedText || "",
+      publication_date: doc.publicationDate ? doc.publicationDate.toISOString() : null
+    }).then(async (aiRes) => {
+      console.log(`[Manual Trigger] AI pipeline completed for Document ${doc.id}`);
+      
+      // Update status to PROCESSED
+      const finalDoc = await prisma.document.update({
+        where: { id: doc.id },
+        data: { status: "PROCESSED" }
+      });
+      req.io.to('compliance-dashboard').emit('document:status', finalDoc);
+
+      // Create audit log
+      await createAuditLog({
+        documentId: doc.id,
+        eventType: 'DOCUMENT_PROCESSED',
+        actor: 'system:pipeline',
+        description: `Document "${doc.title}" compliance analysis pipeline completed successfully.`
+      });
+    }).catch(async (err) => {
+      console.error(`[Manual Trigger Error] AI pipeline failed:`, err.message);
+      const failedDoc = await prisma.document.update({
+        where: { id: doc.id },
+        data: { status: "FAILED" }
+      });
+      req.io.to('compliance-dashboard').emit('document:status', failedDoc);
+    });
+
+    res.json({ message: "Pipeline run triggered", document: updatedDoc });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// GET /api/documents/:id/file — download/view local document PDF/TXT file
+const downloadDocumentFile = async (req, res, next) => {
+  try {
+    const doc = await prisma.document.findUnique({
+      where: { id: req.params.id }
+    });
+    if (!doc || !doc.localFilePath) {
+      return res.status(404).json({ error: "File not found" });
+    }
+    const absolutePath = path.resolve(doc.localFilePath);
+    if (!fs.existsSync(absolutePath)) {
+      return res.status(404).json({ error: "File does not exist on disk" });
+    }
+    res.sendFile(absolutePath);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// DELETE /api/documents/:id — delete document, related maps, evidence, and clear AI memory
+const deleteDocument = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    
+    // 1. Find document
+    const doc = await prisma.document.findUnique({
+      where: { id },
+      include: {
+        maps: {
+          include: {
+            evidenceFiles: true
+          }
+        }
+      }
+    });
+    
+    if (!doc) {
+      return res.status(404).json({ error: 'Document not found' });
+    }
+    
+    // 2. Perform Prisma Transaction to delete related child records
+    await prisma.$transaction(async (tx) => {
+      const mapIds = doc.maps.map(m => m.id);
+      
+      // Delete Alerts for those MAPs
+      if (mapIds.length > 0) {
+        await tx.alert.deleteMany({
+          where: { mapId: { in: mapIds } }
+        });
+        
+        // Delete Evidence records
+        await tx.evidence.deleteMany({
+          where: { mapId: { in: mapIds } }
+        });
+        
+        // Delete Audit logs for those MAPs
+        await tx.auditLog.deleteMany({
+          where: { mapId: { in: mapIds } }
+        });
+      }
+      
+      // Delete Audit logs for the document itself
+      await tx.auditLog.deleteMany({
+        where: { documentId: id }
+      });
+      
+      // Delete Maps
+      await tx.map.deleteMany({
+        where: { documentId: id }
+      });
+      
+      // Delete Document
+      await tx.document.delete({
+        where: { id }
+      });
+    });
+    
+    // 3. Delete physical PDF file if it exists
+    if (doc.localFilePath && fs.existsSync(doc.localFilePath)) {
+      try {
+        fs.unlinkSync(doc.localFilePath);
+        console.log(`[Delete Document] Deleted physical file: ${doc.localFilePath}`);
+      } catch (err) {
+        console.error(`[Delete Document Warning] Failed to delete file on disk: ${err.message}`);
+      }
+    }
+    
+    // 4. Call FastAPI AI Service to clear its memory/embeddings
+    try {
+      let filename = null;
+      if (doc.localFilePath) {
+        filename = path.basename(doc.localFilePath);
+        // Strip out the timestamp prefix (e.g. 1718712312_filename.pdf) if present to match FastAPI upload
+        const match = filename.match(/^\d+_(.+)$/);
+        if (match) {
+          filename = match[1];
+        }
+      }
+      
+      console.log(`[Delete Document] Requesting FastAPI to delete memory for ID: ${id}`);
+      await axios.delete(`${process.env.AI_SERVICE_URL || 'http://localhost:8000'}/api/documents/${id}`, {
+        params: { filename }
+      });
+    } catch (err) {
+      console.error(`[Delete Document Warning] Failed to clear AI memory: ${err.message}`);
+    }
+    
+    // 5. Emit socket event
+    req.io.to('compliance-dashboard').emit('document:deleted', { id });
+    
+    res.json({ success: true, message: `Document "${doc.title}" deleted from system and memory successfully.` });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getDocuments,
   createDocument,
   getDocumentById,
   updateDocumentStatus,
-  uploadDocument
+  uploadDocument,
+  triggerPipeline,
+  downloadDocumentFile,
+  deleteDocument
 };

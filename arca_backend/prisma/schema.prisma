@@ -1,6 +1,6 @@
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 generator client {
@@ -20,6 +20,7 @@ model Document {
   localFilePath   String?   // Where PDF is stored
   extractedText   String?   // Full text after OCR/parsing
   status          String    @default("INGESTED")
+  draftData       String?
   ingestionMethod String    @default("AUTO_SCRAPE") // AUTO_SCRAPE or MANUAL_UPLOAD
   uploadedBy      String?   // Officer ID if manually uploaded
   createdAt       DateTime  @default(now())
@@ -41,7 +42,7 @@ model Map {
   description           String
   obligationType        String      // MANDATORY, CONDITIONAL
   classification        String      // TECHNICAL, NON_TECHNICAL
-  regulatoryKeywords    String[]    // native postgres array of strings
+  regulatoryKeywords    String      @default("[]")    // JSON string array
   
   // Action
   deliverable           String
@@ -49,7 +50,7 @@ model Map {
   priority              String      @default("MEDIUM")  // CRITICAL, HIGH, MEDIUM, LOW
   riskLevel             String      @default("MEDIUM")
   riskDescription       String?
-  evidenceRequired      String[]    // what proof is needed
+  evidenceRequired      String      @default("[]")    // JSON string array
   
   // Assignment
   departmentId          String?
@@ -112,8 +113,8 @@ model AuditLog {
   eventType   String   // MAP_APPROVED, MAP_DISPATCHED, MAP_EDITED, etc.
   actor       String   // "system:agent" or "user:officer_id"
   description String
-  inputData   Json?
-  outputData  Json?
+  inputData   String?
+  outputData  String?
   reasoning   String?
   createdAt   DateTime @default(now())
   map         Map?     @relation(fields: [mapId], references: [id])

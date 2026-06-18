@@ -65,7 +65,7 @@ async def node_generate_maps(state: PipelineState) -> dict:
     pub_date = state.get("publication_date")
     print(f"[Pipeline] Node [generate_maps]: Executing CoT mapping on actionable provisions...")
     try:
-        result = await generate_maps(analysis, pub_date)
+        result = await generate_maps(analysis, pub_date, state.get("extracted_text", ""))
         return {
             "generated_maps": result.get("maps", []),
             "errors": state.get("errors", [])

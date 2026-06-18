@@ -22,7 +22,7 @@ JSON Schema Output Format:
   "document_title": "...",
   "document_id": "Circular ID (e.g. RBI/2026/102)",
   "document_type": "circular / notification / master_direction / guideline",
-  "executive_summary": "Plain English overview summarizing core changes in under 150 words.",
+  "executive_summary": "Detailed, human-friendly compliance summary. Structure it with clear sections:\n- **Overview**: Short summary of the directive.\n- **Key Operational Changes**: Bullet points of specific limit changes, rate ceiling adjustments, tenors, etc.\n- **Scope & Exclusions**: Bullet points explaining who is affected, accounts included, and any explicit exclusions (e.g. transfers restrictions).\n- **Effective Dates**: Bullet points of critical timelines, start dates, and expiry dates.\nFormat with markdown headers, bullet points, and newlines.",
   "key_provisions": [
     {{
       "section": "Clause number (e.g., Section 4.2)",
