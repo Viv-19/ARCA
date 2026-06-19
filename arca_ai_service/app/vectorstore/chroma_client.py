@@ -60,9 +60,13 @@ def get_embedding_function():
     Returns OpenAI Embeddings if configured with valid API keys,
     otherwise returns our custom resilient local hashing embedder.
     """
-    is_dummy_key = settings.OPENAI_API_KEY == "your_openai_api_key_here" or not settings.OPENAI_API_KEY
+    is_dummy_key = (
+        settings.OPENAI_API_KEY == "your_openai_api_key_here" 
+        or not settings.OPENAI_API_KEY 
+        or settings.OPENAI_API_KEY.startswith("gsk_")
+    )
     if is_dummy_key:
-        print("[ChromaDB] OpenAI API key missing or mock. Activating custom Local Term-Hashing Embedder (resilient)...")
+        print("[ChromaDB] OpenAI API key missing, mock, or Groq key. Activating custom Local Term-Hashing Embedder (resilient)...")
         return ResilientLocalEmbeddingFunction()
         
     try:
