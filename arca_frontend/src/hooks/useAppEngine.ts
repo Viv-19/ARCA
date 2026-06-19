@@ -345,9 +345,6 @@ export function useAppEngine() {
 
   // Delete Document and clear memory
   const handleDeleteDocument = async (docId: string) => {
-    if (!window.confirm('Are you sure you want to permanently delete this document and all its associated MAPs, alerts, and audit logs? This will also wipe it from system memory.')) {
-      return;
-    }
     try {
       await api.deleteDocument(docId);
       showToast('Document and its memory successfully deleted.', 'success');
