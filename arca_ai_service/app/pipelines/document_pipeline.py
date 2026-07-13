@@ -125,7 +125,7 @@ async def node_save_maps_to_backend(state: PipelineState) -> dict:
                     "flaggedForReview": map_obj.get("flagged_for_review", False),
                     "flagReason": map_obj.get("flag_reason"),
                     "reasoningChain": map_obj.get("reasoning_chain"),
-                    "modelUsed": "gpt-4o (ARCA multi-agent)",
+                    "modelUsed": f"{settings.MODEL_NAME} (ARCA multi-agent)",
                     "status": "PENDING_REVIEW"
                 }
                 
@@ -162,7 +162,6 @@ async def node_route_all_maps(state: PipelineState) -> dict:
     for map_obj in maps:
         try:
             result = await route_map(
-                map_obj.get("title", "")[:20],
                 map_obj.get("title", ""),
                 map_obj.get("description", ""),
                 map_obj.get("regulatory_keywords", [])

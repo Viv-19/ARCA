@@ -22,7 +22,7 @@ async def route_map_endpoint(map_id: str):
         description = map_obj.get("description", "")
         keywords = map_obj.get("regulatoryKeywords", [])
         
-        routing_result = await route_map(map_id, title, description, keywords)
+        routing_result = await route_map(title, description, keywords)
         
         return routing_result
     except Exception as e:

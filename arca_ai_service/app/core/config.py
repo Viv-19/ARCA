@@ -6,9 +6,9 @@ class Settings(BaseSettings):
     OPENAI_API_BASE: str = "https://api.openai.com/v1"
     MODEL_NAME: str = "gpt-4o"
     LANGSMITH_API_KEY: str = "your_langsmith_api_key_here"
-    LANGCHAIN_TRACING_V2: str = "true"
+    LANGCHAIN_TRACING_V2: str = "false"
     LANGCHAIN_PROJECT: str = "arca-compliance"
-    DATABASE_URL: str = "postgresql://arca_user:arca_pass@localhost:5543/arca?schema=public"
+    DATABASE_URL: str = "postgresql://postgres:newpassword123@localhost:5432/arca"
     REDIS_URL: str = "redis://localhost:6380/0"
     BACKEND_URL: str = "http://localhost:3001"
     CHROMA_PERSIST_PATH: str = "./data/chroma_db"
@@ -28,6 +28,7 @@ os.environ["LANGCHAIN_PROJECT"] = settings.LANGCHAIN_PROJECT
 if settings.OPENAI_API_KEY and settings.OPENAI_API_KEY.startswith("gsk_"):
     print("[Config] Groq API Key detected. Routing all LLM operations to Groq Endpoint.")
     settings.OPENAI_API_BASE = "https://api.groq.com/openai/v1"
+    # Using Llama 3.3 70B Versatile — 128k context window, necessary for large regulatory documents
     settings.MODEL_NAME = "llama-3.3-70b-versatile"
 
 if settings.OPENAI_API_KEY and settings.OPENAI_API_KEY != "your_openai_api_key_here":

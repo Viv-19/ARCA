@@ -35,6 +35,9 @@ Traditional compliance tracking in major banks is **highly manual and error-pron
 ### The Solution: ARCA
 **ARCA** (Autonomous Regulatory Compliance Agent) is a state-of-the-art RegTech platform that automates the **entire compliance lifecycle**—from raw circular ingestion to action item extraction, department-wide routing, SMTP/JIRA task dispatch, evidence collection, and **real-world, autonomous technical code execution sandboxing** to dynamically audit and verify compliance proof.
 
+> 📖 **Read the Full Product Vision & Scope:** [ARCA_Product_Vision_And_Scope.md](docs/ARCA_Product_Vision_And_Scope.md) 
+> ARCA functions as an intelligent compliance operations platform that transforms regulatory circulars into measurable, trackable, and verifiable compliance actions across the bank. It explicitly filters out non-relevant entities (like standalone NBFCs and UCBs) and routes tasks to 13 distinct banking business functions.
+
 ---
 
 ## 2. Key Core Features

@@ -139,6 +139,35 @@ const updateDocumentStatus = async (req, res, next) => {
   }
 };
 
+// PUT /api/documents/:id/draft — save session state (draftData) without finalizing
+const updateDocumentDraft = async (req, res, next) => {
+  try {
+    const { draftData, status } = req.body;
+    
+    // Only update fields that are provided
+    const dataToUpdate = {};
+    if (draftData !== undefined) dataToUpdate.draftData = draftData;
+    if (status !== undefined) dataToUpdate.status = status;
+
+    const doc = await prisma.document.update({
+      where: { id: req.params.id },
+      data: dataToUpdate
+    });
+
+    await createAuditLog({
+      documentId: doc.id,
+      eventType: 'DOCUMENT_DRAFT_SAVED',
+      actor: 'system:pipeline',
+      description: `User saved pipeline session state for Document ${req.params.id}. Status: ${doc.status}`
+    });
+
+    res.json({ success: true, document: doc });
+  } catch (error) {
+    console.error("[Update Draft Error]", error);
+    next(error);
+  }
+};
+
 // POST /api/documents/upload — officer uploads PDF (saves, calls AI process, and creates record)
 const uploadDocument = async (req, res, next) => {
   try {
@@ -149,7 +178,8 @@ const uploadDocument = async (req, res, next) => {
 
     const { regulator = 'RBI', documentType = 'circular', uploadedBy = 'officer-1' } = req.body;
 
-    console.log(`[Manual Upload] Forwarding ${file.originalname} to AI service at ${process.env.AI_SERVICE_URL}...`);
+    const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://localhost:8000';
+    console.log(`[Manual Upload] Forwarding ${file.originalname} to AI service at ${AI_SERVICE_URL}...`);
 
     // Prepare multipart form data for AI service
     const formData = new FormData();
@@ -162,7 +192,7 @@ const uploadDocument = async (req, res, next) => {
 
     // Call FastAPI /api/documents/process
     const aiResponse = await axios.post(
-      `${process.env.AI_SERVICE_URL}/api/documents/process`,
+      `${AI_SERVICE_URL}/api/documents/process`,
       formData,
       {
         headers: {
@@ -241,17 +271,44 @@ const uploadDocument = async (req, res, next) => {
 // POST /api/documents/:id/trigger-pipeline — manually run pipeline on document
 const triggerPipeline = async (req, res, next) => {
   try {
-    const doc = await prisma.document.findUnique({
+    let doc = await prisma.document.findUnique({
       where: { id: req.params.id }
     });
+
     if (!doc) {
-      return res.status(404).json({ error: "Document not found" });
+      // If it's a scraped document from the AI service, we need to fetch it from AI service and create it here!
+      try {
+        const aiDocRes = await axios.get(`${process.env.AI_SERVICE_URL || 'http://localhost:8000'}/api/registry/documents/${req.params.id}`);
+        if (aiDocRes.data) {
+          const aiDoc = aiDocRes.data;
+          doc = await prisma.document.create({
+            data: {
+              id: aiDoc.id,
+              title: aiDoc.title,
+              regulator: aiDoc.department || 'RBI',
+              documentId: aiDoc.circular_number,
+              documentType: 'circular',
+              publicationDate: aiDoc.publication_date ? new Date(aiDoc.publication_date) : new Date(),
+              sourceHash: aiDoc.metadata_hash || `hash_${aiDoc.id}`,
+              contentHash: aiDoc.pdf_hash,
+              pdfUrl: aiDoc.detail_url,
+              localFilePath: aiDoc.pdf_path,
+              status: "INGESTED"
+            }
+          });
+        } else {
+          return res.status(404).json({ error: "Document not found in registry" });
+        }
+      } catch (err) {
+        console.error("[Manual Trigger Error] Failed to sync missing document:", err);
+        return res.status(500).json({ error: "Failed to sync document to Prisma: " + err.message });
+      }
     }
 
-    // Update status to PROCESSING
+    // Update status to PROCESSING_STAGE1
     const updatedDoc = await prisma.document.update({
       where: { id: doc.id },
-      data: { status: "PROCESSING" }
+      data: { status: "PROCESSING_STAGE1" }
     });
 
     // Emit Socket event to update UI immediately
@@ -315,11 +372,66 @@ const downloadDocumentFile = async (req, res, next) => {
   }
 };
 
+// PUT /api/documents/:id/reset-pipeline — reset pipeline session, keep document
+const resetPipelineSession = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const doc = await prisma.document.findUnique({
+      where: { id },
+      include: {
+        maps: { include: { evidenceFiles: true } }
+      }
+    });
+
+    if (!doc) {
+      return res.status(404).json({ error: 'Document not found' });
+    }
+
+    await prisma.$transaction(async (tx) => {
+      const mapIds = doc.maps.map(m => m.id);
+
+      if (mapIds.length > 0) {
+        await tx.alert.deleteMany({ where: { mapId: { in: mapIds } } });
+        await tx.evidence.deleteMany({ where: { mapId: { in: mapIds } } });
+        await tx.auditLog.deleteMany({ where: { mapId: { in: mapIds } } });
+        await tx.map.deleteMany({ where: { documentId: id } });
+      }
+
+      // Clear pipeline-specific audit logs but keep upload/ingest logs
+      await tx.auditLog.deleteMany({
+        where: {
+          documentId: id,
+          eventType: { in: ['DOCUMENT_DRAFT_SAVED', 'DOCUMENT_PROCESSED', 'DOCUMENT_STATUS_UPDATED'] }
+        }
+      });
+
+      await tx.document.update({
+        where: { id },
+        data: { draftData: null, status: 'INGESTED' }
+      });
+    });
+
+    await createAuditLog({
+      documentId: id,
+      eventType: 'PIPELINE_SESSION_RESET',
+      actor: 'user:officer',
+      description: `Pipeline session for "${doc.title}" was reset to INGESTED state.`
+    });
+
+    req.io.to('compliance-dashboard').emit('document:status', { id, status: 'INGESTED' });
+
+    res.json({ success: true, message: `Pipeline session for "${doc.title}" reset successfully.` });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // DELETE /api/documents/:id — delete document, related maps, evidence, and clear AI memory
 const deleteDocument = async (req, res, next) => {
   try {
     const { id } = req.params;
-    
+
     // 1. Find document
     const doc = await prisma.document.findUnique({
       where: { id },
@@ -331,9 +443,17 @@ const deleteDocument = async (req, res, next) => {
         }
       }
     });
-    
+
     if (!doc) {
-      return res.status(404).json({ error: 'Document not found' });
+      // Not in Prisma — try the AI registry directly (scraped-only documents)
+      try {
+        const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://localhost:8000';
+        await axios.delete(`${AI_SERVICE_URL}/api/registry/documents/${id}`);
+        req.io.to('compliance-dashboard').emit('document:deleted', { id });
+        return res.json({ success: true, message: 'Document deleted from AI registry.' });
+      } catch (aiErr) {
+        return res.status(404).json({ error: 'Document not found in any system' });
+      }
     }
     
     // 2. Perform Prisma Transaction to delete related child records
@@ -395,8 +515,9 @@ const deleteDocument = async (req, res, next) => {
         }
       }
       
+      const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://localhost:8000';
       console.log(`[Delete Document] Requesting FastAPI to delete memory for ID: ${id}`);
-      await axios.delete(`${process.env.AI_SERVICE_URL || 'http://localhost:8000'}/api/documents/${id}`, {
+      await axios.delete(`${AI_SERVICE_URL}/api/documents/${id}`, {
         params: { filename }
       });
     } catch (err) {
@@ -417,8 +538,10 @@ module.exports = {
   createDocument,
   getDocumentById,
   updateDocumentStatus,
+  updateDocumentDraft,
   uploadDocument,
   triggerPipeline,
   downloadDocumentFile,
-  deleteDocument
+  deleteDocument,
+  resetPipelineSession
 };

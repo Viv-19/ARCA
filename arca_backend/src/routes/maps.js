@@ -44,15 +44,17 @@ const upload = multer({
   limits: { fileSize: 25 * 1024 * 1024 } // 25MB total limit for screenshots/logs/reports
 });
 
-// Routing endpoints mapping
+// Routing endpoints mapping — static/named routes MUST come before /:id wildcards
 router.get('/', getMaps);
 router.post('/', createMap);
 router.get('/pending-review', getPendingReview);
+router.post('/approve-bulk', bulkApprove);
+
+// Parameterized routes
 router.get('/:id', getMapById);
 router.put('/:id/approve', approveMap);
 router.put('/:id/edit', editAndApproveMap);
 router.put('/:id/reject', rejectMap);
-router.post('/approve-bulk', bulkApprove);
 
 // Dispatch
 router.post('/:id/dispatch', handleManualDispatch);

@@ -1,0 +1,72 @@
+.delete-modal-content {
+  max-width: 500px;
+}
+
+.warning-banner {
+  display: flex;
+  gap: 12px;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  padding: 16px;
+  border-radius: 6px;
+  color: #991b1b;
+  margin-bottom: 16px;
+  align-items: flex-start;
+}
+
+.warning-icon {
+  font-size: 1.2rem;
+}
+
+.warning-banner p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.consequence-text {
+  color: #334155;
+  margin-bottom: 24px;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #475569;
+  font-size: 0.95rem;
+}
+
+.delete-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 1.1rem;
+}
+
+.delete-input:focus {
+  outline: none;
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+}
+
+.btn-danger {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background-color: #dc2626;
+}
+
+.btn-danger:disabled {
+  background-color: #fca5a5;
+  cursor: not-allowed;
+}

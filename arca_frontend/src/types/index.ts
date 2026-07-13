@@ -59,17 +59,33 @@ export interface MAP {
 export interface Document {
   id: string;
   title: string;
+  // Regulator field — used by both registry (department) and Prisma (regulator)
   regulator: string;
+  department?: string;
+
+  // Prisma / backend camelCase fields
   documentId?: string;
-  documentType: string;
+  documentType?: string;
   publicationDate?: string;
-  sourceHash: string;
+  sourceHash?: string;
   contentHash?: string;
   pdfUrl?: string;
   localFilePath?: string;
   extractedText?: string;
-  status: string;
-  ingestionMethod: string;
+  draftData?: string;
+  ingestionMethod?: string;
   uploadedBy?: string;
-  createdAt: string;
+  createdAt?: string;
+
+  // AI Registry snake_case fields (from FastAPI scraper service)
+  publication_date?: string;
+  circular_number?: string;
+  detail_url?: string;
+  pdf_path?: string;
+  metadata_path?: string;
+  markdown_path?: string;
+  meant_for?: string;
+  metadata_hash?: string;
+
+  status: string;
 }

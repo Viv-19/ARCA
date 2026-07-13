@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 
 // Modular Components
 import { Toast } from './components/Toast';
@@ -16,6 +16,8 @@ import { DispatchTrackerTab } from './pages/DispatchTrackerTab';
 import { DepartmentBoardTab } from './pages/DepartmentBoardTab';
 import { CircularIngestTab } from './pages/CircularIngestTab';
 import { AgentWorkbenchTab } from './pages/AgentWorkbenchTab';
+import { DocumentLibraryTab } from './pages/DocumentLibraryTab';
+import { SessionsTab } from './pages/SessionsTab';
 
 // App Logic Hook
 import { useAppEngine } from './hooks/useAppEngine';
@@ -55,6 +57,7 @@ function App() {
     manualType,
     setManualType,
     documents,
+    backendDocuments,
     allDocsModalOpen,
     setAllDocsModalOpen,
     pipelineProgress,
@@ -76,11 +79,13 @@ function App() {
     isConnected,
     wsLogs,
     toast,
+    setToast,
     pendingMaps,
     activeDispatches,
     scoreColor,
     handleTriggerPipeline,
     handleDeleteDocument,
+    handleResetSession,
     handleAlertScan,
     handleMarkAlertRead,
     handleApproveMap,
@@ -107,7 +112,22 @@ function App() {
     handleConfirmMaps,
     handleConfirmRouting,
     handlePublishPipeline,
+    handleSaveSession,
+    handleCreateMaps,
+    mapsLoading,
+    confirmingMaps,
+    confirmingRouting,
+    intakeStatus,
+    setWorkbenchStep,
   } = useAppEngine();
+
+  // Merge Prisma docs (backendDocuments) with AI-registry-only docs (scraped but not yet pipeline-triggered)
+  // Prisma docs take precedence since they carry pipeline status and draftData
+  const mergedDocuments = useMemo(() => {
+    const prismaIdSet = new Set(backendDocuments.map((d) => d.id));
+    const aiOnlyDocs = documents.filter((d) => !prismaIdSet.has(d.id));
+    return [...backendDocuments, ...aiOnlyDocs];
+  }, [backendDocuments, documents]);
 
   return (
     <div className="app-container">
@@ -186,7 +206,7 @@ function App() {
 
         {/* ═══════ TAB 5: CIRCULAR INGEST ═══════ */}
         {activeTab === 'ingestion' && (
-          <CircularIngestTab 
+          <CircularIngestTab
             manualRegulator={manualRegulator}
             setManualRegulator={setManualRegulator}
             manualType={manualType}
@@ -195,9 +215,10 @@ function App() {
             setSelectedFile={setSelectedFile}
             uploadProgress={uploadProgress}
             scraperStatus={scraperStatus}
+            intakeStatus={intakeStatus}
             onTriggerScraper={handleTriggerScraper}
             onUploadDocument={handleUploadDocument}
-            documents={documents}
+            documents={mergedDocuments}
             pipelineProgress={pipelineProgress}
             onTriggerPipeline={handleTriggerPipeline}
             onDeleteDocument={handleDeleteDocument}
@@ -210,6 +231,7 @@ function App() {
           <AgentWorkbenchTab 
             activePipelineDocId={activePipelineDocId}
             workbenchStep={workbenchStep}
+            setWorkbenchStep={setWorkbenchStep}
             draftMapsList={draftMapsList}
             setDraftMapsList={setDraftMapsList}
             executiveSummary={executiveSummary}
@@ -222,6 +244,35 @@ function App() {
             handleConfirmMaps={handleConfirmMaps}
             handleConfirmRouting={handleConfirmRouting}
             handlePublishPipeline={handlePublishPipeline}
+            handleSaveSession={handleSaveSession}
+            handleDeleteDocument={handleDeleteDocument}
+            handleResetSession={handleResetSession}
+            handleCreateMaps={handleCreateMaps}
+            mapsLoading={mapsLoading}
+            confirmingMaps={confirmingMaps}
+            confirmingRouting={confirmingRouting}
+          />
+        )}
+
+        {/* ═══════ TAB 7: DOCUMENT LIBRARY ═══════ */}
+        {activeTab === 'library' && (
+          <DocumentLibraryTab
+            documents={mergedDocuments}
+            pipelineProgress={pipelineProgress}
+            onDeleteDocument={handleDeleteDocument}
+            onTriggerPipeline={handleTriggerPipeline}
+            BACKEND_URL={BACKEND_URL}
+          />
+        )}
+
+        {/* ═══════ TAB 8: SESSIONS ═══════ */}
+        {activeTab === 'sessions' && (
+          <SessionsTab
+            documents={backendDocuments}
+            handleSelectActiveDoc={handleSelectActiveDoc}
+            handleResetSession={handleResetSession}
+            handleDeleteDocument={handleDeleteDocument}
+            setActiveTab={setActiveTab}
           />
         )}
 

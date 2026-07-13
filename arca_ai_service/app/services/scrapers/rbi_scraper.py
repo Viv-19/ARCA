@@ -71,7 +71,7 @@ def parse_rbi_date(date_str: str) -> str:
     return datetime.date.today().isoformat()
 
 
-async def scrape_rbi_circulars(limit: int = 10, log_callback = None):
+async def scrape_rbi_circulars(limit: int = 10, known_circulars: set = None, log_callback = None):
     """
     Production-grade scraper for the RBI Circulars Index page.
 
@@ -139,6 +139,12 @@ async def scrape_rbi_circulars(limit: int = 10, log_callback = None):
 
                 circular_number = link_tag.get_text(separator=" ").strip()
                 detail_href = link_tag.get("href", "")
+                
+                # High-Water Mark Logic:
+                # If we encounter a circular we already know about, we can stop scraping entirely!
+                if known_circulars and circular_number in known_circulars:
+                    log(f"[RBI Scraper] Reached High-Water Mark (already seen {circular_number}). Stopping scrape.")
+                    break
 
                 # Cell 1: Date of Issue
                 date_text = cells[1].get_text().strip()

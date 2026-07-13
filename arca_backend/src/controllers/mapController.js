@@ -397,9 +397,10 @@ const uploadEvidence = async (req, res, next) => {
 
     // Trigger AI validation automatically (Phase 4 autonomous checking loop)
     console.log(`[Validation Gate] Fired autonomous validation for MAP: ${mapId}...`);
-    
+
+    const AI_URL = process.env.AI_SERVICE_URL || 'http://localhost:8000';
     // Asynchronous background call
-    axios.post(`${process.env.AI_SERVICE_URL}/api/validation/validate/${mapId}`)
+    axios.post(`${AI_URL}/api/validation/validate/${mapId}`)
       .then(async (result) => {
         console.log(`[Validation Gate] AI validation results received for MAP ${map.mapCode}:`, result.data);
         const { overall_result, reasoning } = result.data;
@@ -530,7 +531,7 @@ const getMapValidationScript = async (req, res, next) => {
   try {
     console.log(`[Validation Script] Forwarding query to AI service for MAP ${req.params.id}...`);
     const response = await axios.get(
-      `${process.env.AI_SERVICE_URL}/api/validation/script/${req.params.id}`,
+      `${process.env.AI_SERVICE_URL || 'http://localhost:8000'}/api/validation/script/${req.params.id}`,
       { timeout: 3000 }
     );
     res.json(response.data);

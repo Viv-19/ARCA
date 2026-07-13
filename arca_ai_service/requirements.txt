@@ -19,3 +19,4 @@ httpx
 langsmith
 pydantic
 pydantic-settings
+asyncpg

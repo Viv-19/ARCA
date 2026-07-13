@@ -112,10 +112,21 @@ export const api = {
     return res.data;
   },
 
-  // Ingestion & Documents
+  // Ingestion & Documents — fetches from AI registry (scraper-managed documents)
   getDocuments: async (limit = 100) => {
+    const res = await aiApi.get(`/api/registry/documents`);
+    return res.data;
+  },
+
+  // Backend managed documents (Prisma / PostgreSQL)
+  getBackendDocuments: async (limit = 100) => {
     const res = await backendApi.get(`/api/documents?limit=${limit}`);
     return res.data;
+  },
+
+  getBackendDocumentById: async (id: string) => {
+    const res = await backendApi.get(`/api/documents/${id}`);
+    return res.data as Document;
   },
 
   uploadDocument: async (formData: FormData) => {
@@ -131,13 +142,29 @@ export const api = {
   },
 
   deleteDocument: async (docId: string) => {
+    // CRITICAL BUG FIX: Hit backendApi instead of aiApi so Prisma record + file is cleaned up too.
     const res = await backendApi.delete(`/api/documents/${docId}`);
+    return res.data;
+  },
+
+  savePipelineDraft: async (docId: string, data: { draftData: string, status?: string }) => {
+    const res = await backendApi.put(`/api/documents/${docId}/draft`, data);
+    return res.data;
+  },
+
+  resetPipelineSession: async (docId: string) => {
+    const res = await backendApi.put(`/api/documents/${docId}/reset-pipeline`, {});
     return res.data;
   },
 
   // Scraper Service (AI FastAPI Backend)
   getScraperStatus: async () => {
     const res = await aiApi.get('/api/scraper/status');
+    return res.data;
+  },
+
+  getIntakeStatus: async () => {
+    const res = await aiApi.get('/api/intake/batch-status');
     return res.data;
   },
 

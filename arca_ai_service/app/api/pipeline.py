@@ -63,17 +63,31 @@ async def run_pipeline(payload: PipelineRunRequest):
 
 # Schema for Stage 1
 class Stage1Request(BaseModel):
+    document_id: str
     extracted_text: str
     publication_date: Optional[str] = None
 
 @router.post("/stage1")
 async def pipeline_stage1(payload: Stage1Request):
     try:
-        print(f"[Pipeline API] Stage 1 request received.")
+        print(f"[Pipeline API] Stage 1 request received for doc: {payload.document_id}")
+        
+        extracted_text = payload.extracted_text
+        if not extracted_text or not extracted_text.strip():
+            print(f"[Pipeline Stage 1] No extracted text provided. Invoking Docling for {payload.document_id}...")
+            from app.services.processing_engine.docling_parser import process_document
+            
+            docling_res = await process_document(payload.document_id)
+            if docling_res.get("status") == "SUCCESS":
+                md_path = docling_res["artifacts"]["markdown"]
+                with open(md_path, "r", encoding="utf-8") as f:
+                    extracted_text = f.read()
+            else:
+                raise Exception(f"Docling parsing failed: {docling_res.get('reason')}")
         
         # 1. Analyze Document
         print("[Pipeline Stage 1] Running LLM Parsing (Document Agent)...")
-        analysis = await run_document_agent(payload.extracted_text, payload.publication_date)
+        analysis = await run_document_agent(extracted_text, payload.publication_date)
         
         # 2. Check Inventory
         print("[Pipeline Stage 1] Checking Inventory overlap...")
@@ -82,13 +96,14 @@ async def pipeline_stage1(payload: Stage1Request):
         
         # 3. Generate MAPs
         print("[Pipeline Stage 1] Generating Action Points (MAPs)...")
-        maps_data = await generate_maps(analysis, payload.publication_date, payload.extracted_text)
+        maps_data = await generate_maps(analysis, payload.publication_date, extracted_text)
         generated_maps = maps_data.get("maps", [])
         
         return {
             "analysis": analysis,
             "inventory_result": inventory_result,
-            "generated_maps": generated_maps
+            "generated_maps": generated_maps,
+            "extracted_text": extracted_text
         }
     except Exception as e:
         print(f"[Pipeline API Error] Stage 1 execution failed: {e}")
@@ -105,7 +120,6 @@ async def pipeline_stage2(payload: Stage2Request):
         routing_results = []
         for map_obj in payload.maps:
             result = await route_map(
-                map_obj.get("title", "")[:20],
                 map_obj.get("title", ""),
                 map_obj.get("description", ""),
                 map_obj.get("regulatory_keywords", [])

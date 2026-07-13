@@ -64,7 +64,9 @@ async function createComplianceTicket(map) {
     return null;
   }
 
-  const isMock = process.env.JIRA_API_TOKEN === 'mock_jira_token_for_hackathon' || 
+  const isMock = !process.env.JIRA_BASE_URL ||
+                 !process.env.JIRA_API_TOKEN ||
+                 process.env.JIRA_API_TOKEN === 'mock_jira_token_for_hackathon' ||
                  process.env.JIRA_BASE_URL.includes('mock-jira.atlassian.net');
 
   if (isMock) {

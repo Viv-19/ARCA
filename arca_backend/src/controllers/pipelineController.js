@@ -24,9 +24,43 @@ const createAuditLog = async ({ mapId, documentId, eventType, actor, description
 const startPipeline = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const doc = await prisma.document.findUnique({ where: { id } });
+    let doc = await prisma.document.findUnique({ where: { id } });
     if (!doc) {
-      return res.status(404).json({ error: "Document not found" });
+      // Fetch missing document from AI service registry
+      try {
+        const aiDocRes = await axios.get(`${AI_URL}/api/registry/documents/${id}`);
+        if (aiDocRes.data) {
+          const aiDoc = aiDocRes.data;
+          const srcHash = aiDoc.metadata_hash || `hash_${aiDoc.id}`;
+          
+          // Clean up any conflicting old record that has the same sourceHash but different ID
+          const existingConflict = await prisma.document.findUnique({ where: { sourceHash: srcHash } });
+          if (existingConflict && existingConflict.id !== aiDoc.id) {
+            await prisma.document.delete({ where: { id: existingConflict.id } });
+          }
+
+          doc = await prisma.document.create({
+            data: {
+              id: aiDoc.id,
+              title: aiDoc.title,
+              regulator: aiDoc.department || 'RBI',
+              documentId: aiDoc.circular_number,
+              documentType: 'circular',
+              publicationDate: aiDoc.publication_date ? new Date(aiDoc.publication_date) : new Date(),
+              sourceHash: srcHash,
+              contentHash: aiDoc.pdf_hash,
+              pdfUrl: aiDoc.detail_url,
+              localFilePath: aiDoc.pdf_path,
+              status: "INGESTED"
+            }
+          });
+        } else {
+          return res.status(404).json({ error: "Document not found in AI registry" });
+        }
+      } catch (err) {
+        console.error("[Pipeline Start Error] Failed to sync missing document:", err.message);
+        return res.status(500).json({ error: "Failed to sync document to Prisma: " + err.message });
+      }
     }
 
     // Update status to PROCESSING_STAGE1
@@ -40,11 +74,12 @@ const startPipeline = async (req, res, next) => {
 
     // Call FastAPI stage1
     const aiResponse = await axios.post(`${AI_URL}/api/pipeline/stage1`, {
+      document_id: doc.id,
       extracted_text: doc.extractedText || "",
       publication_date: doc.publicationDate ? doc.publicationDate.toISOString().split('T')[0] : null
     });
 
-    const { analysis, inventory_result, generated_maps } = aiResponse.data;
+    const { analysis, inventory_result, generated_maps, extracted_text } = aiResponse.data;
 
     // Save to draftData JSON string
     const draftData = JSON.stringify({
@@ -57,7 +92,8 @@ const startPipeline = async (req, res, next) => {
       where: { id },
       data: {
         status: "DRAFT_MAPS_GENERATED",
-        draftData
+        draftData,
+        extractedText: extracted_text || doc.extractedText
       }
     });
 
@@ -271,7 +307,7 @@ const publishPipeline = async (req, res, next) => {
           flaggedForReview: map_obj.flaggedForReview || map_obj.flagged_for_review || false,
           flagReason: map_obj.flagReason || map_obj.flag_reason || "",
           reasoningChain: map_obj.reasoningChain || map_obj.reasoning_chain || "",
-          modelUsed: "gpt-4o (ARCA multi-agent)",
+          modelUsed: `${process.env.MODEL_NAME || 'ARCA multi-agent'}`,
           departmentId: map_obj.departmentId || null,
           status: "PENDING_REVIEW"
         }

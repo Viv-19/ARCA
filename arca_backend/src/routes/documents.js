@@ -9,10 +9,12 @@ const {
   createDocument,
   getDocumentById,
   updateDocumentStatus,
+  updateDocumentDraft,
   uploadDocument,
   triggerPipeline,
   downloadDocumentFile,
-  deleteDocument
+  deleteDocument,
+  resetPipelineSession
 } = require('../controllers/documentController');
 
 // Ensure uploads/temp directory exists
@@ -48,8 +50,10 @@ router.get('/', getDocuments);
 router.post('/', createDocument);
 router.get('/:id', getDocumentById);
 router.put('/:id/status', updateDocumentStatus);
+router.put('/:id/draft', updateDocumentDraft);
 router.post('/upload', upload.single('file'), uploadDocument);
 router.post('/:id/trigger-pipeline', triggerPipeline);
+router.put('/:id/reset-pipeline', resetPipelineSession);
 router.get('/:id/file', downloadDocumentFile);
 router.delete('/:id', deleteDocument);
 

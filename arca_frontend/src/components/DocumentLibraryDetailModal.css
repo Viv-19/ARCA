@@ -1,0 +1,114 @@
+.doc-detail-modal {
+  max-width: 900px;
+  width: 90%;
+}
+
+.doc-detail-body {
+  padding: 20px;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+}
+
+.detail-column h3 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 1.1rem;
+  color: #1e293b;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 8px;
+}
+
+.section-title {
+  margin-top: 24px !important;
+}
+
+.metadata-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.metadata-table td {
+  padding: 8px 0;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 0.95rem;
+  color: #334155;
+}
+
+.badge-domain {
+  background-color: #e0e7ff;
+  color: #4338ca;
+}
+
+.status-new { background-color: #f1f5f9; color: #475569; }
+.status-classified { background-color: #fef08a; color: #854d0e; }
+.status-downloaded { background-color: #bfdbfe; color: #1e40af; }
+.status-processed { background-color: #d9f99d; color: #3f6212; }
+.status-failed { background-color: #fecaca; color: #991b1b; }
+
+.artifact-links {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.artifact-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  text-decoration: none;
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.artifact-btn:hover:not(:disabled) {
+  background-color: #dbeafe;
+}
+
+.artifact-btn.secondary-btn {
+  background-color: #f8fafc;
+  color: #64748b;
+  border-color: #e2e8f0;
+}
+
+.artifact-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.progress-box {
+  background-color: #f8fafc;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.logs-box {
+  background-color: #0f172a;
+  color: #10b981;
+  padding: 12px;
+  border-radius: 8px;
+  height: 200px;
+  overflow-y: auto;
+  font-family: monospace;
+  font-size: 0.85rem;
+}
+
+.logs-box pre {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.empty-logs {
+  color: #64748b;
+  font-style: italic;
+}

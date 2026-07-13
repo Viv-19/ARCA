@@ -44,7 +44,7 @@ export const AllDocsModal: React.FC<AllDocsModalProps> = ({
               {documents.map((doc) => (
                 <tr key={doc.id} style={{borderBottom: '1px solid var(--border)'}}>
                   <td style={{padding: '10px', fontSize: '11px', whiteSpace: 'nowrap'}} className="mono">
-                    {doc.publicationDate ? new Date(doc.publicationDate).toLocaleDateString() : 'N/A'}
+                    {doc.publication_date ? new Date(doc.publication_date).toLocaleDateString() : '-'}
                   </td>
                   <td style={{padding: '10px', fontSize: '11px'}}>
                     <span className="badge badge-info" style={{fontSize: '9px'}}>{doc.regulator}</span>
@@ -76,7 +76,7 @@ export const AllDocsModal: React.FC<AllDocsModalProps> = ({
                   </td>
                   <td style={{padding: '10px', textAlign: 'right'}}>
                     <div style={{display: 'flex', gap: '8px', justifyContent: 'flex-end', alignItems: 'center'}}>
-                      {(doc.status === 'INGESTED' || doc.status === 'FAILED') ? (
+                      {['NEW', 'DOWNLOADED', 'FAILED'].includes(doc.status) ? (
                         <button 
                           className="btn-primary" 
                           style={{padding: '4px 10px', fontSize: '10.5px'}}

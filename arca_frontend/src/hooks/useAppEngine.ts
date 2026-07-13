@@ -4,7 +4,7 @@ import { api } from '../services/api';
 import { useDashboardSocket } from './useDashboardSocket';
 
 export function useAppEngine() {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'review' | 'tracker' | 'portal' | 'ingestion' | 'workbench'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'review' | 'tracker' | 'portal' | 'ingestion' | 'workbench' | 'library' | 'sessions'>('dashboard');
 
   // Dashboard state
   const [overallScore, setOverallScore] = useState<number>(100);
@@ -30,11 +30,13 @@ export function useAppEngine() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState<string>('');
   const [scraperStatus, setScraperStatus] = useState<any>({ status: 'IDLE', logs: [] });
+  const [intakeStatus, setIntakeStatus] = useState<any>({ status: 'IDLE', logs: [] });
   const [manualRegulator, setManualRegulator] = useState<string>('RBI');
   const [manualType, setManualType] = useState<string>('circular');
   const [documents, setDocuments] = useState<Document[]>([]);
   const [allDocsModalOpen, setAllDocsModalOpen] = useState<boolean>(false);
   const [pipelineProgress, setPipelineProgress] = useState<Record<string, string>>({});
+  const [backendDocuments, setBackendDocuments] = useState<Document[]>([]);
 
   // Modals and Active Selections
   const [activeMap, setActiveMap] = useState<MAP | null>(null);
@@ -69,6 +71,10 @@ export function useAppEngine() {
   const [riskScore, setRiskScore] = useState<number>(0);
   const [conflictAlerts, setConflictAlerts] = useState<string[]>([]);
   const [generatedScripts, setGeneratedScripts] = useState<any[]>([]);
+  const [pendingMapsData, setPendingMapsData] = useState<any[]>([]);
+  const [mapsLoading, setMapsLoading] = useState<boolean>(false);
+  const [confirmingMaps, setConfirmingMaps] = useState<boolean>(false);
+  const [confirmingRouting, setConfirmingRouting] = useState<boolean>(false);
 
   // Toast notifications
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
@@ -131,13 +137,33 @@ export function useAppEngine() {
     }
   }, []);
 
-  // Fetch ingested documents
+  // Fetch intake status
+  const fetchIntakeStatus = useCallback(async () => {
+    try {
+      const data = await api.getIntakeStatus();
+      setIntakeStatus(data);
+    } catch (err) {
+      console.error('Failed to load intake status:', err);
+    }
+  }, []);
+
+  // Fetch ingested documents (AI registry — scraper-managed circulars)
   const fetchDocuments = useCallback(async () => {
     try {
       const data = await api.getDocuments(100);
       setDocuments(data.documents || []);
     } catch (err) {
       console.error('Failed to load documents:', err);
+    }
+  }, []);
+
+  // Fetch backend (Prisma) documents — these have draftData and pipeline statuses
+  const fetchBackendDocuments = useCallback(async () => {
+    try {
+      const data = await api.getBackendDocuments(200);
+      setBackendDocuments(data.documents || []);
+    } catch (err) {
+      console.error('Failed to load backend documents:', err);
     }
   }, []);
 
@@ -180,6 +206,7 @@ export function useAppEngine() {
 
     onDocumentStatus: useCallback((data: any) => {
       setDocuments((prev) => prev.map((d) => (d.id === data.id ? data : d)));
+      setBackendDocuments((prev) => prev.map((d) => (d.id === data.id ? data : d)));
       fetchAllMaps();
       fetchDashboard();
     }, [fetchDashboard, fetchAllMaps]),
@@ -190,7 +217,9 @@ export function useAppEngine() {
     fetchDashboard();
     fetchAllMaps();
     fetchScraper();
+    fetchIntakeStatus();
     fetchDocuments();
+    fetchBackendDocuments();
 
     // Automatically select the first department if available
     api.getDepartments().then((data: any) => {
@@ -198,7 +227,7 @@ export function useAppEngine() {
         setSelectedDeptId(data[0].id);
       }
     }).catch((e: any) => console.warn("No departments seeded yet:", e.message));
-  }, [fetchDashboard, fetchAllMaps, fetchScraper, fetchDocuments]);
+  }, [fetchDashboard, fetchAllMaps, fetchScraper, fetchIntakeStatus, fetchDocuments, fetchBackendDocuments]);
 
   useEffect(() => {
     if (selectedDeptId) {
@@ -206,101 +235,167 @@ export function useAppEngine() {
     }
   }, [selectedDeptId, fetchDeptMaps]);
 
-  // Poll scraper status when running
+  // Poll scraper and intake status when running
   useEffect(() => {
     let interval: any;
-    if (scraperStatus && scraperStatus.status === 'RUNNING') {
+    const isRunning = (scraperStatus && scraperStatus.status === 'RUNNING') || (intakeStatus && intakeStatus.status === 'RUNNING');
+    if (isRunning) {
       interval = setInterval(() => {
         fetchScraper();
+        fetchIntakeStatus();
         fetchDocuments();
       }, 1500);
     }
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [scraperStatus?.status, fetchScraper, fetchDocuments]);
+  }, [scraperStatus?.status, intakeStatus?.status, fetchScraper, fetchIntakeStatus, fetchDocuments]);
+
+  // Auto-save helper — useCallback so callers can safely list it as a dependency
+  const autoSaveDraft = useCallback(async (maps: any[], summary: string, status: string, riskScoreVal?: number, conflictsVal?: string[], scriptsVal?: any[]) => {
+    if (!activePipelineDocId) return;
+    try {
+      const draftData = {
+        generated_maps: maps,
+        analysis: { executive_summary: summary },
+        risk_assessment: { system_risk_score: riskScoreVal ?? riskScore, conflicts: conflictsVal ?? conflictAlerts },
+        scripts: scriptsVal ?? generatedScripts
+      };
+      await api.savePipelineDraft(activePipelineDocId, {
+        draftData: JSON.stringify(draftData),
+        status
+      });
+      fetchDocuments();
+      fetchBackendDocuments();
+    } catch (err) {
+      console.warn('Auto-save failed:', err);
+    }
+  }, [activePipelineDocId, riskScore, conflictAlerts, generatedScripts, fetchDocuments, fetchBackendDocuments]);
 
   const handleSelectActiveDoc = async (docId: string | null) => {
     if (!docId) {
       setActivePipelineDocId(null);
       setDraftMapsList([]);
       setExecutiveSummary('');
+      setRiskScore(0);
+      setConflictAlerts([]);
+      setGeneratedScripts([]);
+      setPendingMapsData([]);
+      setMapsLoading(false);
       return;
     }
     setActivePipelineDocId(docId);
-    setWorkbenchStep(1);
-    
+    setPendingMapsData([]);
+    setMapsLoading(false);
+
     try {
-      const res = await api.getDocuments(100);
-      const docs = res.documents || [];
-      const doc = docs.find((d: any) => d.id === docId);
-      
+      // Fetch Prisma document directly — it carries draftData and pipeline statuses
+      const doc = await api.getBackendDocumentById(docId);
+
       if (doc && doc.draftData) {
+        // Restore saved session — no re-running the agent
         const draft = JSON.parse(doc.draftData);
-        setDraftMapsList(draft.generated_maps || []);
         setExecutiveSummary(draft.analysis?.executive_summary || '');
         setRiskScore(draft.risk_assessment?.system_risk_score || 0);
         setConflictAlerts(draft.risk_assessment?.conflicts || []);
         setGeneratedScripts(draft.scripts || []);
         
-        if (doc.status === 'DRAFT_MAPS_GENERATED') {
-          setWorkbenchStep(2);
-        } else if (doc.status === 'DRAFT_MAPS_ROUTED') {
-          setWorkbenchStep(3);
+        // Restore to correct step (5-step system)
+        if (doc.status === 'PROCESSED') {
+          setDraftMapsList(draft.generated_maps || []);
+          setWorkbenchStep(5);
         } else if (doc.status === 'DRAFT_PIPELINE_FINALIZED') {
+          setDraftMapsList(draft.generated_maps || []);
+          setWorkbenchStep(5);
+        } else if (doc.status === 'DRAFT_MAPS_ROUTED' || doc.status === 'PROCESSING_STAGE2' || doc.status === 'PROCESSING_STAGE3') {
+          setDraftMapsList(draft.generated_maps || []);
           setWorkbenchStep(4);
+        } else if (doc.status === 'DRAFT_MAPS_GENERATED') {
+          setDraftMapsList(draft.generated_maps || []);
+          setWorkbenchStep(3);
+        } else if (doc.status === 'SUMMARY_GENERATED') {
+          setDraftMapsList([]);
+          setPendingMapsData(draft.generated_maps || []);
+          setWorkbenchStep(2);
         } else {
+          // Has draftData but unknown status — show summary
+          setDraftMapsList([]);
+          setPendingMapsData(draft.generated_maps || []);
           setWorkbenchStep(2);
         }
       } else {
-        // Start pipeline
+        // No saved draft → fresh start, invoke the pipeline agent
+        setWorkbenchStep(1);
+        setDraftMapsList([]);
+        setExecutiveSummary('');
         const startRes = await api.startPipeline(docId);
         if (startRes.success && startRes.document.draftData) {
           const draft = JSON.parse(startRes.document.draftData);
-          setDraftMapsList(draft.generated_maps || []);
           setExecutiveSummary(draft.analysis?.executive_summary || '');
+          // Store maps as pending — don't show yet
+          setPendingMapsData(draft.generated_maps || []);
           setWorkbenchStep(2);
+          // Auto-save summary state
+          await autoSaveDraft(draft.generated_maps || [], draft.analysis?.executive_summary || '', 'SUMMARY_GENERATED');
         }
       }
     } catch (err) {
       showToast('Failed to resume pipeline: ' + err, 'error');
-      setWorkbenchStep(2);
+      setWorkbenchStep(1);
     }
   };
 
+  // User clicks "Generate MAPs" — reveal the maps that were already computed
+  // Capture values at call time so the closure inside setTimeout doesn't go stale
+  const handleCreateMaps = useCallback(() => {
+    if (!activePipelineDocId) return;
+    setMapsLoading(true);
+    const capturedMaps = pendingMapsData;
+    const capturedSummary = executiveSummary;
+    setTimeout(() => {
+      setDraftMapsList(capturedMaps);
+      setPendingMapsData([]);
+      setMapsLoading(false);
+      setWorkbenchStep(3);
+      showToast('MAPs generated successfully.', 'success');
+      autoSaveDraft(capturedMaps, capturedSummary, 'DRAFT_MAPS_GENERATED').catch(console.warn);
+    }, 3000);
+  }, [activePipelineDocId, pendingMapsData, executiveSummary, autoSaveDraft, showToast]);
+
   const handleConfirmMaps = async () => {
     if (!activePipelineDocId) return;
-    setWorkbenchStep(1);
+    setConfirmingMaps(true);
     try {
       const res = await api.confirmMaps(activePipelineDocId, draftMapsList);
       if (res.success && res.document.draftData) {
         const draft = JSON.parse(res.document.draftData);
         setDraftMapsList(draft.generated_maps || []);
-        setWorkbenchStep(3);
+        setWorkbenchStep(4);
         showToast('MAP candidates confirmed. AI department routing triggered.', 'success');
       } else {
         showToast('Failed to route MAPs. Draft data empty.', 'error');
-        setWorkbenchStep(2);
       }
     } catch (err) {
       showToast('Failed to route MAPs: ' + err, 'error');
-      setWorkbenchStep(2);
+    } finally {
+      setConfirmingMaps(false);
     }
   };
 
   const handleConfirmRouting = async () => {
     if (!activePipelineDocId) return;
-    setWorkbenchStep(1);
+    setConfirmingRouting(true);
     try {
       const res = await api.finalizePipeline(activePipelineDocId, draftMapsList);
       setRiskScore(res.risk_assessment?.system_risk_score || 0);
       setConflictAlerts(res.risk_assessment?.conflicts || []);
       setGeneratedScripts(res.scripts || []);
-      setWorkbenchStep(4);
+      setWorkbenchStep(5);
       showToast('Department routing confirmed. Systemic risk analysis complete.', 'success');
     } catch (err) {
       showToast('Failed to finalize routing: ' + err, 'error');
-      setWorkbenchStep(3);
+    } finally {
+      setConfirmingRouting(false);
     }
   };
 
@@ -311,13 +406,44 @@ export function useAppEngine() {
       showToast('Compliance circular successfully published! Operational controls populated.', 'success');
       setActivePipelineDocId(null);
       setDraftMapsList([]);
+      setPendingMapsData([]);
       setWorkbenchStep(1);
-      setActiveTab('dashboard');
+      setActiveTab('sessions');
       fetchDashboard();
       fetchAllMaps();
       fetchDocuments();
+      fetchBackendDocuments();
     } catch (err) {
       showToast('Failed to publish pipeline: ' + err, 'error');
+    }
+  };
+
+  const handleSaveSession = async () => {
+    if (!activePipelineDocId) return;
+    try {
+      const draftData = {
+        generated_maps: draftMapsList.length > 0 ? draftMapsList : pendingMapsData,
+        analysis: { executive_summary: executiveSummary },
+        risk_assessment: { system_risk_score: riskScore, conflicts: conflictAlerts },
+        scripts: generatedScripts
+      };
+      
+      let statusToSave = 'PROCESSING_STAGE1';
+      if (workbenchStep === 2) statusToSave = 'SUMMARY_GENERATED';
+      if (workbenchStep === 3) statusToSave = 'DRAFT_MAPS_GENERATED';
+      if (workbenchStep === 4) statusToSave = 'DRAFT_MAPS_ROUTED';
+      if (workbenchStep === 5) statusToSave = 'DRAFT_PIPELINE_FINALIZED';
+
+      await api.savePipelineDraft(activePipelineDocId, {
+        draftData: JSON.stringify(draftData),
+        status: statusToSave
+      });
+      
+      showToast('Session saved successfully.', 'success');
+      fetchDocuments();
+      fetchBackendDocuments();
+    } catch (err) {
+      showToast('Failed to save session: ' + err, 'error');
     }
   };
 
@@ -330,14 +456,16 @@ export function useAppEngine() {
       const res = await api.startPipeline(docId);
       if (res.success && res.document.draftData) {
         const draft = JSON.parse(res.document.draftData);
-        setDraftMapsList(draft.generated_maps || []);
         setExecutiveSummary(draft.analysis?.executive_summary || '');
-        setWorkbenchStep(2);
-        showToast('Stage 1 pipeline completed: MAPs generated.', 'success');
+        setPendingMapsData(draft.generated_maps || []);
+        setWorkbenchStep(2); // Show summary first, not maps
+        showToast('Extraction complete. Executive summary generated.', 'success');
+        await autoSaveDraft(draft.generated_maps || [], draft.analysis?.executive_summary || '', 'SUMMARY_GENERATED');
       } else {
         showToast('Pipeline started, but draft maps failed to generate.', 'error');
       }
       fetchDocuments();
+      fetchBackendDocuments();
     } catch (err) {
       showToast('Failed to trigger pipeline: ' + err, 'error');
     }
@@ -348,11 +476,40 @@ export function useAppEngine() {
     try {
       await api.deleteDocument(docId);
       showToast('Document and its memory successfully deleted.', 'success');
+      if (activePipelineDocId === docId) {
+        setActivePipelineDocId(null);
+        setDraftMapsList([]);
+        setExecutiveSummary('');
+        setWorkbenchStep(1);
+      }
       fetchDocuments();
+      fetchBackendDocuments();
       fetchDashboard();
       fetchAllMaps();
     } catch (err) {
       showToast('Failed to delete document: ' + err, 'error');
+    }
+  };
+
+  const handleResetSession = async (docId: string) => {
+    try {
+      await api.resetPipelineSession(docId);
+      showToast('Pipeline session reset. Document preserved in library.', 'success');
+      if (activePipelineDocId === docId) {
+        setActivePipelineDocId(null);
+        setDraftMapsList([]);
+        setExecutiveSummary('');
+        setRiskScore(0);
+        setConflictAlerts([]);
+        setGeneratedScripts([]);
+        setPendingMapsData([]);
+        setWorkbenchStep(1);
+      }
+      fetchBackendDocuments();
+      fetchDashboard();
+      fetchAllMaps();
+    } catch (err) {
+      showToast('Failed to reset session: ' + err, 'error');
     }
   };
 
@@ -613,11 +770,13 @@ export function useAppEngine() {
     setSelectedFile,
     uploadProgress,
     scraperStatus,
+    intakeStatus,
     manualRegulator,
     setManualRegulator,
     manualType,
     setManualType,
     documents,
+    backendDocuments,
     allDocsModalOpen,
     setAllDocsModalOpen,
     pipelineProgress,
@@ -645,6 +804,7 @@ export function useAppEngine() {
     scoreColor,
     handleTriggerPipeline,
     handleDeleteDocument,
+    handleResetSession,
     handleAlertScan,
     handleMarkAlertRead,
     handleApproveMap,
@@ -673,5 +833,10 @@ export function useAppEngine() {
     handleConfirmMaps,
     handleConfirmRouting,
     handlePublishPipeline,
+    handleSaveSession,
+    handleCreateMaps,
+    mapsLoading,
+    confirmingMaps,
+    confirmingRouting,
   };
 }

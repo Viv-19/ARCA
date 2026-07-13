@@ -1,15 +1,37 @@
 import os
+import re
+import math
 import chromadb
 from app.core.config import settings
 
 _client = None
 
+try:
+    from chromadb.api.types import EmbeddingFunction
+except ImportError:
+    class EmbeddingFunction:
+        pass
+
 # Custom Resilient Local Embedding Generator for offline sandbox execution
-class ResilientLocalEmbeddingFunction:
+class ResilientLocalEmbeddingFunction(EmbeddingFunction):
     """
     Computes a deterministic text embedding vector based on word frequency hashing.
     Outputs a stable, normalized 1536-dimensional vector (compatible with OpenAI shape).
     """
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def name() -> str:
+        return "ResilientLocalEmbeddingFunction"
+
+    def get_config(self) -> dict:
+        return {}
+
+    @staticmethod
+    def build_from_config(config: dict) -> "ResilientLocalEmbeddingFunction":
+        return ResilientLocalEmbeddingFunction()
+
     def __call__(self, input_texts):
         # input_texts can be a string or list of strings
         if isinstance(input_texts, str):
@@ -41,10 +63,6 @@ class ResilientLocalEmbeddingFunction:
                 
             embeddings.append(vector)
         return embeddings
-
-# Global regex and math imports needed inside local class
-import re
-import math
 
 def get_chroma_client():
     global _client
@@ -80,28 +98,52 @@ def get_embedding_function():
         print(f"[ChromaDB Warning] Failed to import/initialize OpenAI Embeddings ({e}). Loading resilient local embedder.")
         return ResilientLocalEmbeddingFunction()
 
+def _get_or_recreate_collection(client, name: str, embedding_fn, metadata: dict):
+    """
+    Opens a ChromaDB collection, auto-healing embedding-function conflicts.
+
+    ChromaDB persists the embedding function name alongside the collection.
+    If the persisted name differs from the requested one (e.g. the app was
+    previously run with OpenAI keys and is now running with local embeddings,
+    or vice-versa), ChromaDB raises a conflict error.  We handle this by
+    deleting the stale collection and recreating it fresh — the data will be
+    reseeded on the next call to the relevant seed function.
+    """
+    try:
+        return client.get_or_create_collection(
+            name, embedding_function=embedding_fn, metadata=metadata
+        )
+    except Exception as e:
+        err = str(e)
+        if "embedding function" in err.lower() and ("conflict" in err.lower() or "already exists" in err.lower()):
+            print(f"[ChromaDB] Embedding function conflict detected for '{name}'. "
+                  f"Auto-deleting stale collection and recreating with current embedder...")
+            try:
+                client.delete_collection(name)
+            except Exception as del_err:
+                print(f"[ChromaDB Warning] Could not delete stale collection '{name}': {del_err}")
+            return client.get_or_create_collection(
+                name, embedding_function=embedding_fn, metadata=metadata
+            )
+        raise
+
+
 def get_regulations_collection():
     client = get_chroma_client()
-    return client.get_or_create_collection(
-        "regulations_db",
-        embedding_function=get_embedding_function(),
-        metadata={"hnsw:space": "cosine"}
+    return _get_or_recreate_collection(
+        client, "regulations_db", get_embedding_function(), {"hnsw:space": "cosine"}
     )
 
 def get_maps_collection():
     client = get_chroma_client()
-    return client.get_or_create_collection(
-        "maps_db",
-        embedding_function=get_embedding_function(),
-        metadata={"hnsw:space": "cosine"}
+    return _get_or_recreate_collection(
+        client, "maps_db", get_embedding_function(), {"hnsw:space": "cosine"}
     )
 
 def get_departments_collection():
     client = get_chroma_client()
-    return client.get_or_create_collection(
-        "departments_db",
-        embedding_function=get_embedding_function(),
-        metadata={"hnsw:space": "cosine"}
+    return _get_or_recreate_collection(
+        client, "departments_db", get_embedding_function(), {"hnsw:space": "cosine"}
     )
 
 def add_regulation_embedding(document_id: str, text: str, metadata: dict = None):

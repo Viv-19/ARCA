@@ -11,6 +11,7 @@ interface CircularIngestTabProps {
   setSelectedFile: (file: File | null) => void;
   uploadProgress: string;
   scraperStatus: any;
+  intakeStatus: any;
   onTriggerScraper: () => void;
   onUploadDocument: (e: React.FormEvent) => void;
   documents: Document[];
@@ -29,6 +30,7 @@ export const CircularIngestTab: React.FC<CircularIngestTabProps> = ({
   setSelectedFile,
   uploadProgress,
   scraperStatus,
+  intakeStatus,
   onTriggerScraper,
   onUploadDocument,
   documents,
@@ -164,9 +166,17 @@ export const CircularIngestTab: React.FC<CircularIngestTabProps> = ({
                 {scraperStatus.last_run ? new Date(scraperStatus.last_run).toLocaleString() : 'Never'}
               </span>
             </div>
-            <div style={{display: 'flex', justifyContent: 'space-between'}}>
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
               <span style={{fontWeight: 600, color: 'var(--text-tertiary)', fontSize: '11px'}}>Documents Discovered:</span>
-              <span className="mono" style={{fontWeight: 700, color: 'var(--text)'}}>{scraperStatus.last_results_count || 0}</span>
+              <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                {scraperStatus.status === 'COMPLETED' && scraperStatus.new_documents_count === 0 && scraperStatus.existing_documents_count > 0 ? (
+                  <span className="badge badge-success" style={{fontSize: '9px', padding: '2px 6px', background: 'rgba(34, 139, 34, 0.1)', color: '#228B22', border: '1px solid #228B22'}}>
+                    Documents up to date till today's date
+                  </span>
+                ) : (
+                  <span className="mono" style={{fontWeight: 700, color: 'var(--text)'}}>{scraperStatus.last_results_count || 0}</span>
+                )}
+              </div>
             </div>
           </div>
 
@@ -236,6 +246,61 @@ export const CircularIngestTab: React.FC<CircularIngestTabProps> = ({
                 {scraperStatus.logs.map((log: string, idx: number) => (
                   <div key={idx} style={{whiteSpace: 'pre-wrap'}}>{log}</div>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* Intake Pipeline Visual Checklist */}
+          {intakeStatus && intakeStatus.logs && intakeStatus.logs.length > 0 && (
+            <div style={{marginTop: '16px', background: 'var(--surface-raised)', borderRadius: '6px', border: '1px solid var(--border)', overflow: 'hidden'}}>
+              <div style={{
+                background: 'rgba(139, 180, 208, 0.1)', 
+                padding: '10px 12px', 
+                borderBottom: '1px solid var(--border)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                <Cpu size={14} color="#8BB4D0" />
+                <span style={{fontWeight: 700, fontSize: '11px', color: '#8BB4D0', textTransform: 'uppercase', letterSpacing: '0.5px'}}>
+                  Intelligent Intake Pipeline Activity
+                </span>
+                {intakeStatus.status === 'RUNNING' && <RefreshCw size={12} className="animate-spin" color="#8BB4D0" style={{marginLeft: 'auto'}} />}
+              </div>
+              <div style={{padding: '12px', display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '200px', overflowY: 'auto'}}>
+                {intakeStatus.logs.map((log: string, idx: number) => {
+                  let icon = <Info size={12} color="var(--text-tertiary)" />;
+                  let color = "var(--text)";
+                  const logText = log.replace(/\[.*?\] /, ''); // strip timestamp
+
+                  if (logText.includes("Processing") || logText.includes("Evaluating")) {
+                    icon = <RefreshCw size={12} color="var(--primary)" className="animate-spin" />;
+                    color = "var(--primary)";
+                  } else if (logText.includes("Classification") || logText.includes("Fetching")) {
+                    icon = <Cpu size={12} color="#8BB4D0" />;
+                  } else if (logText.includes("Confidence") || logText.includes("confidence")) {
+                    icon = <Info size={12} color="#EAB308" />;
+                    color = "var(--text-secondary)";
+                  } else if (logText.includes("Decision")) {
+                    icon = (logText.includes("relevant=True") || logText.includes("True")) ? <Info size={12} color="#228B22" /> : <Info size={12} color="#EF4444" />;
+                    color = (logText.includes("relevant=True") || logText.includes("True")) ? "#228B22" : "#EF4444";
+                  } else if (logText.includes("Complete") || logText.includes("successfully")) {
+                    icon = <Info size={12} color="#228B22" />;
+                    color = "#228B22";
+                  } else if (logText.includes("FAILED") || logText.includes("ERROR")) {
+                    icon = <Info size={12} color="#EF4444" />;
+                    color = "#EF4444";
+                  }
+
+                  return (
+                    <div key={idx} style={{display: 'flex', gap: '8px', alignItems: 'flex-start'}}>
+                      <div style={{marginTop: '2px'}}>{icon}</div>
+                      <div style={{fontSize: '11px', color, lineHeight: '1.4', fontWeight: 500}}>
+                        {logText}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}

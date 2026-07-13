@@ -41,9 +41,10 @@ const dispatchMap = async (mapId, io) => {
 
   // Step 2: Route the MAP using RAG + AI routing service
   try {
-    console.log(`[Dispatch] Requesting AI Service routing at ${process.env.AI_SERVICE_URL}/api/routing/route-map/${map.id}...`);
+    const AI_URL = process.env.AI_SERVICE_URL || 'http://localhost:8000';
+    console.log(`[Dispatch] Requesting AI Service routing at ${AI_URL}/api/routing/route-map/${map.id}...`);
     const aiResponse = await axios.post(
-      `${process.env.AI_SERVICE_URL}/api/routing/route-map/${map.id}`,
+      `${AI_URL}/api/routing/route-map/${map.id}`,
       {},
       { timeout: 4000 }
     );
@@ -57,8 +58,14 @@ const dispatchMap = async (mapId, io) => {
     if (map.departmentId) {
       // Use the department already assigned by the officer
       const preAssignedDept = await prisma.department.findUnique({ where: { id: map.departmentId } });
-      finalDeptName = preAssignedDept.name;
-      routingJustification = "Officer manual assignment used as router fallback.";
+      if (preAssignedDept) {
+        finalDeptName = preAssignedDept.name;
+        routingJustification = "Officer manual assignment used as router fallback.";
+      } else {
+        finalDeptName = "Compliance Central";
+        routingJustification = "Pre-assigned department record not found. Routed to Central Compliance.";
+        confidenceScore = 0.5;
+      }
     } else {
       // Ultimate default fallback
       finalDeptName = "Compliance Central";

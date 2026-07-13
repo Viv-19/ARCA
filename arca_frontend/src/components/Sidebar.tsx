@@ -10,13 +10,15 @@ import {
   ExternalLink, 
   Play, 
   RefreshCw, 
-  Cpu 
+  Cpu,
+  Database,
+  Clock
 } from 'lucide-react';
 import type { Document } from '../types';
 
 interface SidebarProps {
-  activeTab: 'dashboard' | 'review' | 'tracker' | 'portal' | 'ingestion' | 'workbench';
-  setActiveTab: (tab: 'dashboard' | 'review' | 'tracker' | 'portal' | 'ingestion' | 'workbench') => void;
+  activeTab: 'dashboard' | 'review' | 'tracker' | 'portal' | 'ingestion' | 'workbench' | 'library' | 'sessions';
+  setActiveTab: (tab: 'dashboard' | 'review' | 'tracker' | 'portal' | 'ingestion' | 'workbench' | 'library' | 'sessions') => void;
   pendingMapsCount: number;
   activeDispatchesCount: number;
   isConnected: boolean;
@@ -92,6 +94,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <Upload size={14} />
           Circular Ingest
         </div>
+        <div className={`nav-item ${activeTab === 'library' ? 'active' : ''}`} onClick={() => setActiveTab('library')}>
+          <Database size={14} />
+          Document Library
+        </div>
+        <div className={`nav-item ${activeTab === 'sessions' ? 'active' : ''}`} onClick={() => setActiveTab('sessions')}>
+          <Clock size={14} />
+          Sessions
+        </div>
         <div className={`nav-item ${activeTab === 'workbench' ? 'active' : ''}`} onClick={() => setActiveTab('workbench')}>
           <Cpu size={14} />
           Agent Workbench
@@ -150,15 +160,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   {doc.status}
                 </span>
                 <div style={{display: 'flex', gap: '6px', alignItems: 'center'}}>
-                  {doc.pdfUrl && (
-                    <a href={doc.pdfUrl} target="_blank" rel="noreferrer" title="Open RBI website link" style={{color: '#60A5FA', display: 'inline-flex'}}>
+                  {(doc.pdfUrl || doc.detail_url) && (
+                    <a href={doc.pdfUrl || doc.detail_url} target="_blank" rel="noreferrer" title="Open RBI website link" style={{color: '#60A5FA', display: 'inline-flex'}}>
                       <ExternalLink size={10} />
                     </a>
                   )}
                   <a href={`${BACKEND_URL}/api/documents/${doc.id}/file`} target="_blank" rel="noreferrer" title="Open local PDF" style={{color: '#EAB308', display: 'inline-flex'}}>
                     <FileText size={10} />
                   </a>
-                  {(doc.status === 'INGESTED' || doc.status === 'FAILED') && (
+                  {['NEW', 'DOWNLOADED', 'FAILED'].includes(doc.status) && (
                     <button 
                       style={{background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#34D399', display: 'inline-flex'}}
                       onClick={() => onTriggerPipeline(doc.id)}

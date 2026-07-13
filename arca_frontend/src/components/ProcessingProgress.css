@@ -1,0 +1,34 @@
+.processing-progress-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+
+.progress-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #64748b; /* text-slate-500 */
+}
+
+.progress-step.step-done {
+  color: #0f172a; /* text-slate-900 */
+  font-weight: 500;
+}
+
+.progress-step.step-done .step-icon {
+  color: #10b981; /* emerald-500 */
+}
+
+.progress-step.step-failed {
+  color: #ef4444; /* red-500 */
+  font-weight: 500;
+}
+
+.step-icon {
+  font-size: 1.1rem;
+  width: 18px;
+  text-align: center;
+}
